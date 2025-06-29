@@ -414,7 +414,8 @@ const ChatArea = ({ selectedGroup, socket }) => {
                 No Group Selected
               </div>
               <div className="text-sm sm:text-md max-w-md mx-auto text-gray-500 leading-relaxed">
-                Please select a group from the sidebar to start chatting.
+                Please select a group from the sidebar to start chatting in
+                ChatVerse.
                 <br />
                 You can join or create a group to begin your conversation!
               </div>

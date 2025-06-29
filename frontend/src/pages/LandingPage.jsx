@@ -15,24 +15,34 @@ import {
 } from "react-icons/fi";
 
 const Feature = ({ title, text, icon, badges = [] }) => (
-  <div className="card p-6 space-y-4 hover:-translate-y-2 transition-all duration-300 group">
-    <div className="w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-2xl mb-4 group-hover:scale-110 transition-transform duration-300">
-      {icon}
-    </div>
-    <div>
-      <div className="flex items-center space-x-2 mb-3">
-        <span className="font-bold text-xl text-gray-800">{title}</span>
-        {badges.map((badge, idx) => (
+  <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-gray-100">
+    <div className="flex items-center justify-between mb-4">
+      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white">
+        {icon}
+      </div>
+      <div className="flex gap-2">
+        {badges.map((badge, index) => (
           <span
-            key={idx}
-            className={`px-3 py-1 rounded-full text-xs font-medium bg-${badge.color}-100 text-${badge.color}-700`}
+            key={index}
+            className={`px-2 py-1 text-xs rounded-full font-medium ${
+              badge.color === "green"
+                ? "bg-green-100 text-green-700"
+                : badge.color === "blue"
+                ? "bg-blue-100 text-blue-700"
+                : badge.color === "purple"
+                ? "bg-purple-100 text-purple-700"
+                : badge.color === "orange"
+                ? "bg-orange-100 text-orange-700"
+                : "bg-gray-100 text-gray-700"
+            }`}
           >
             {badge.text}
           </span>
         ))}
       </div>
-      <p className="text-gray-600 leading-relaxed">{text}</p>
     </div>
+    <h3 className="text-xl font-bold text-gray-800 mb-2">{title}</h3>
+    <p className="text-gray-600 leading-relaxed">{text}</p>
   </div>
 );
 
@@ -66,12 +76,12 @@ export default function LandingPage() {
             <div className="space-y-4">
               <h1 className="font-bold leading-tight text-5xl sm:text-6xl lg:text-7xl">
                 <span className="relative inline-block text-gray-800">
-                  Modern
+                  Welcome to
                   <span className="absolute left-0 bottom-2 w-full h-3 bg-gradient-to-r from-blue-400 to-indigo-500 -z-10 rounded-full opacity-30"></span>
                 </span>
                 <br />
                 <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Chat App
+                  ChatVerse
                 </span>
               </h1>
               <p className="text-gray-600 text-xl lg:text-2xl leading-relaxed max-w-2xl mx-auto lg:mx-0">
@@ -126,7 +136,7 @@ export default function LandingPage() {
                     <FiUsers className="text-xl" />
                   </div>
                   <div>
-                    <span className="font-bold text-lg">Team Chat</span>
+                    <span className="font-bold text-lg">Team ChatVerse</span>
                     <div className="text-blue-100 text-sm">
                       3 members online
                     </div>
@@ -239,7 +249,7 @@ export default function LandingPage() {
           <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-3xl p-12 text-center text-white">
             <div className="max-w-3xl mx-auto space-y-6">
               <h3 className="text-4xl lg:text-5xl font-bold">
-                Ready to get started?
+                Ready to join ChatVerse?
               </h3>
               <p className="text-xl text-blue-100 leading-relaxed">
                 Join thousands of users already using our platform for seamless
