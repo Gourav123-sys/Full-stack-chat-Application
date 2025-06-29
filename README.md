@@ -182,10 +182,4 @@ The application is deployed on:
 4. Test thoroughly
 5. Submit a pull request
 
-## License
 
-This project is licensed under the MIT License.
-
-## Support
-
-If you encounter any issues or have questions, please open an issue on GitHub.
