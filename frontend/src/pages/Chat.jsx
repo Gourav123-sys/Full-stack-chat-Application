@@ -3,7 +3,7 @@ import { FiMenu, FiX } from "react-icons/fi";
 import Sidebar from "../components/Sidebar";
 import ChatArea from "../components/ChatArea";
 import io from "socket.io-client";
-const ENDPOINT = "https://full-stack-chat-application-zz0h.onrender.com";
+import { SOCKET_URL } from "../config/api.js";
 
 const Chat = () => {
   const [selectedGroup, setSelectedGroup] = useState(null);
@@ -12,9 +12,25 @@ const Chat = () => {
 
   useEffect(() => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
-    const newSocket = io(ENDPOINT, {
+    const newSocket = io(SOCKET_URL, {
       auth: { user: userInfo },
+      transports: ["websocket", "polling"],
+      timeout: 20000,
     });
+
+    // Add connection event listeners
+    newSocket.on("connect", () => {
+      console.log("Connected to server");
+    });
+
+    newSocket.on("connect_error", (error) => {
+      console.error("Connection error:", error);
+    });
+
+    newSocket.on("disconnect", (reason) => {
+      console.log("Disconnected:", reason);
+    });
+
     setSocket(newSocket);
     return () => {
       newSocket.disconnect();

@@ -9,6 +9,7 @@ import {
 import UsersList from "./UsersList";
 import axios from "axios";
 import { toast } from "react-toastify";
+import API_BASE_URL from "../config/api.js";
 
 const ChatArea = ({ selectedGroup, socket }) => {
   const [messages, setMessages] = useState([]);
@@ -18,6 +19,7 @@ const ChatArea = ({ selectedGroup, socket }) => {
   const [typingUsers, setTypingUsers] = useState(new Set());
   const [loading, setLoading] = useState(false);
   const [showUsersList, setShowUsersList] = useState(false);
+  const [socketConnected, setSocketConnected] = useState(false);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
@@ -34,13 +36,14 @@ const ChatArea = ({ selectedGroup, socket }) => {
   const fetchMessages = async () => {
     try {
       const { data } = await axios.get(
-        `https://full-stack-chat-application-zz0h.onrender.com/api/messages/${selectedGroup._id}`,
+        `${API_BASE_URL}/api/messages/${selectedGroup._id}`,
         {
           headers: { Authorization: `Bearer ${currentUser.token}` },
         }
       );
       setMessages(data);
-    } catch {
+    } catch (error) {
+      console.error("Failed to fetch messages:", error);
       toast.error("Failed to fetch messages");
     }
   };
@@ -49,18 +52,25 @@ const ChatArea = ({ selectedGroup, socket }) => {
   useEffect(() => {
     if (selectedGroup && socket) {
       fetchMessages();
+
+      // Join room
       socket.emit("join room", selectedGroup?._id);
 
+      // Listen for new messages
       socket.on("message recieved", (newMessage) => {
+        console.log("New message received:", newMessage);
         setMessages((prev) => [...prev, newMessage]);
       });
 
+      // Listen for users in room
       socket.on("Users in room", (users) => {
         console.log("Users in room:", users);
         setConnectedUsers(users || []);
       });
 
+      // Listen for user joined
       socket.on("user joined", (user) => {
+        console.log("User joined:", user);
         setConnectedUsers((prev) => {
           const exists = prev.find((u) => u._id === user._id);
           if (!exists) {
@@ -70,13 +80,17 @@ const ChatArea = ({ selectedGroup, socket }) => {
         });
       });
 
+      // Listen for user left
       socket.on("user left", (userId) => {
+        console.log("User left:", userId);
         setConnectedUsers((prev) =>
           prev.filter((user) => user?._id !== userId)
         );
       });
 
+      // Listen for notifications
       socket.on("notification", (notification) => {
+        console.log("Notification:", notification);
         toast.info(notification.message, {
           position: "top-right",
           autoClose: 3000,
@@ -87,13 +101,16 @@ const ChatArea = ({ selectedGroup, socket }) => {
         });
       });
 
+      // Listen for typing indicators
       socket.on("user typing", ({ username }) => {
+        console.log("User typing:", username);
         if (username !== currentUser.username) {
           setTypingUsers((prev) => new Set(prev).add(username));
         }
       });
 
       socket.on("user stop typing", ({ username }) => {
+        console.log("User stopped typing:", username);
         setTypingUsers((prev) => {
           const newSet = new Set(prev);
           newSet.delete(username);
@@ -116,7 +133,33 @@ const ChatArea = ({ selectedGroup, socket }) => {
         }
       };
     }
-  }, [selectedGroup, socket]);
+  }, [selectedGroup, socket, currentUser.username]);
+
+  // Monitor socket connection status
+  useEffect(() => {
+    if (socket) {
+      const handleConnect = () => {
+        console.log("Socket connected");
+        setSocketConnected(true);
+      };
+
+      const handleDisconnect = () => {
+        console.log("Socket disconnected");
+        setSocketConnected(false);
+      };
+
+      socket.on("connect", handleConnect);
+      socket.on("disconnect", handleDisconnect);
+
+      // Set initial connection status
+      setSocketConnected(socket.connected);
+
+      return () => {
+        socket.off("connect", handleConnect);
+        socket.off("disconnect", handleDisconnect);
+      };
+    }
+  }, [socket]);
 
   // Send message
   const sendMessage = async (e) => {
@@ -125,7 +168,7 @@ const ChatArea = ({ selectedGroup, socket }) => {
     setLoading(true);
     try {
       const { data } = await axios.post(
-        "https://full-stack-chat-application-zz0h.onrender.com/api/messages",
+        `${API_BASE_URL}/api/messages`,
         {
           content: newMessage,
           groupId: selectedGroup?._id,
@@ -134,18 +177,24 @@ const ChatArea = ({ selectedGroup, socket }) => {
           headers: { Authorization: `Bearer ${currentUser.token}` },
         }
       );
+
+      // Emit new message to socket
       socket.emit("new message", {
         ...data,
         groupId: selectedGroup?._id,
       });
+
+      // Add message to local state
       setMessages((prev) => [...prev, data]);
       setNewMessage("");
+
       // Stop typing indicator
       socket.emit("stop typing", {
         groupId: selectedGroup?._id,
       });
       setIsTyping(false);
-    } catch {
+    } catch (error) {
+      console.error("Failed to send message:", error);
       toast.error("Failed to send message");
     } finally {
       setLoading(false);
@@ -191,7 +240,7 @@ const ChatArea = ({ selectedGroup, socket }) => {
   // handle typing
   const handleTyping = (e) => {
     setNewMessage(e.target.value);
-    if (!isTyping && selectedGroup) {
+    if (!isTyping && selectedGroup && socketConnected) {
       setIsTyping(true);
       socket.emit("typing", {
         username: currentUser.username,
@@ -206,7 +255,7 @@ const ChatArea = ({ selectedGroup, socket }) => {
 
     // set new timeout
     typingTimeoutRef.current = setTimeout(() => {
-      if (selectedGroup) {
+      if (selectedGroup && socketConnected) {
         socket.emit("stop typing", {
           groupId: selectedGroup?._id,
         });
@@ -217,6 +266,13 @@ const ChatArea = ({ selectedGroup, socket }) => {
 
   return (
     <div className="flex h-full relative bg-gray-50 overflow-hidden">
+      {/* Connection Status Indicator */}
+      {!socketConnected && (
+        <div className="absolute top-2 right-2 z-20 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-medium animate-pulse">
+          Connecting...
+        </div>
+      )}
+
       {/* Chat Area - Fixed layout */}
       <div className="flex-1 flex flex-col bg-white lg:max-w-[calc(100%-260px)] overflow-hidden">
         {/* Chat Header - Fixed */}
@@ -378,11 +434,16 @@ const ChatArea = ({ selectedGroup, socket }) => {
                 placeholder="Type your message..."
                 value={newMessage}
                 onChange={handleTyping}
-                disabled={!selectedGroup || loading}
+                disabled={!selectedGroup || loading || !socketConnected}
               />
               <button
                 type="submit"
-                disabled={!selectedGroup || loading || !newMessage.trim()}
+                disabled={
+                  !selectedGroup ||
+                  loading ||
+                  !newMessage.trim() ||
+                  !socketConnected
+                }
                 className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-md"
               >
                 <FiSend className="text-sm sm:text-lg" />

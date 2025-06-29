@@ -4,6 +4,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useState } from "react";
+import { API_ENDPOINTS } from "../config/api.js";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -15,19 +16,17 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data } = await axios.post(
-        "https://full-stack-chat-application-zz0h.onrender.com/api/users/login",
-        {
-          email,
-          password,
-        }
-      );
+      const { data } = await axios.post(API_ENDPOINTS.LOGIN, {
+        email,
+        password,
+      });
       // Save user into localstorage
       localStorage.setItem("userInfo", JSON.stringify(data.user));
       toast.success("Login Successful");
       setLoading(false);
       navigate("/chat");
     } catch (err) {
+      console.error("Login error:", err);
       toast.error(err.response?.data?.message || "An error occurred");
       setLoading(false);
     }

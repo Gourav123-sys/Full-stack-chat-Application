@@ -3,6 +3,7 @@ import { FiLogOut, FiPlus, FiUsers, FiX } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
+import API_BASE_URL from "../config/api.js";
 
 const Sidebar = ({ setSelectedGroup }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,14 +47,11 @@ const Sidebar = ({ setSelectedGroup }) => {
       const userInfo = checkAuth();
       if (!userInfo) return;
 
-      const { data } = await axios.get(
-        "https://full-stack-chat-application-zz0h.onrender.com/api/groups",
-        {
-          headers: {
-            Authorization: `Bearer ${userInfo.token}`,
-          },
-        }
-      );
+      const { data } = await axios.get(`${API_BASE_URL}/api/groups`, {
+        headers: {
+          Authorization: `Bearer ${userInfo.token}`,
+        },
+      });
       setGroups(data);
 
       const userGroupIds = data
@@ -63,6 +61,7 @@ const Sidebar = ({ setSelectedGroup }) => {
         .map((group) => group._id);
       setUserGroups(userGroupIds);
     } catch (error) {
+      console.error("Failed to fetch groups:", error);
       toast.error(error.response?.data?.message || "Failed to fetch groups");
     }
   };
@@ -84,7 +83,7 @@ const Sidebar = ({ setSelectedGroup }) => {
       if (!userInfo) return;
 
       await axios.post(
-        "https://full-stack-chat-application-zz0h.onrender.com/api/groups",
+        `${API_BASE_URL}/api/groups`,
         {
           name: newGroupName,
           description: newGroupDescription,
@@ -101,6 +100,7 @@ const Sidebar = ({ setSelectedGroup }) => {
       setNewGroupDescription("");
       fetchGroups();
     } catch (error) {
+      console.error("Failed to create group:", error);
       toast.error(error.response?.data?.message || "Failed to create group");
     } finally {
       setLoading(false);
@@ -113,7 +113,7 @@ const Sidebar = ({ setSelectedGroup }) => {
       const userInfo = checkAuth();
       if (!userInfo) return;
       await axios.post(
-        `https://full-stack-chat-application-zz0h.onrender.com/api/groups/${groupId}/join`,
+        `${API_BASE_URL}/api/groups/${groupId}/join`,
         {},
         {
           headers: {
@@ -125,6 +125,7 @@ const Sidebar = ({ setSelectedGroup }) => {
       setSelectedGroup(groups.find((g) => g?._id === groupId));
       toast.success("Joined the group successfully");
     } catch (error) {
+      console.error("Failed to join group:", error);
       toast.error(error.response?.data?.message || "Failed to join group");
     } finally {
       setActionLoading("");
@@ -137,7 +138,7 @@ const Sidebar = ({ setSelectedGroup }) => {
       const userInfo = checkAuth();
       if (!userInfo) return;
       await axios.post(
-        `https://full-stack-chat-application-zz0h.onrender.com/api/groups/${groupId}/leave`,
+        `${API_BASE_URL}/api/groups/${groupId}/leave`,
         {},
         {
           headers: {
@@ -149,6 +150,7 @@ const Sidebar = ({ setSelectedGroup }) => {
       setSelectedGroup(null);
       toast.success("Left the group successfully");
     } catch (error) {
+      console.error("Failed to leave group:", error);
       toast.error(error.response?.data?.message || "Failed to leave group");
     } finally {
       setActionLoading("");

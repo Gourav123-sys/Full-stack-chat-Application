@@ -10,6 +10,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useState } from "react";
+import { API_ENDPOINTS } from "../config/api.js";
 
 const Register = () => {
   const [username, setUsername] = useState("");
@@ -22,18 +23,16 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data } = await axios.post(
-        "https://full-stack-chat-application-zz0h.onrender.com/api/users/register",
-        {
-          username,
-          email,
-          password,
-        }
-      );
+      const { data } = await axios.post(API_ENDPOINTS.REGISTER, {
+        username,
+        email,
+        password,
+      });
       toast.success("Registration Successful");
       setLoading(false);
       navigate("/login");
     } catch (err) {
+      console.error("Registration error:", err);
       toast.error(err.response?.data?.message || "An error occurred");
       setLoading(false);
     }

@@ -1,6 +1,10 @@
 // API Configuration
-const API_BASE_URL = "https://full-stack-chat-application-zz0h.onrender.com";
-const SOCKET_URL = "https://full-stack-chat-application-zz0h.onrender.com";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://full-stack-chat-application-zz0h.onrender.com";
+const SOCKET_URL =
+  import.meta.env.VITE_SOCKET_URL ||
+  "https://full-stack-chat-application-zz0h.onrender.com";
 
 // API Endpoints
 export const API_ENDPOINTS = {
