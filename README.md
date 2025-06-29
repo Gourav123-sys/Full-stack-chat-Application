@@ -2,6 +2,11 @@
 
 A modern, real-time chat application built with React, Node.js, Express, MongoDB, and Socket.IO.
 
+## 🌐 Live Demo
+
+- **Frontend**: [https://full-stack-chat-application-chi.vercel.app/](https://full-stack-chat-application-chi.vercel.app/)
+- **Backend API**: [https://full-stack-chat-application-zz0h.onrender.com](https://full-stack-chat-application-zz0h.onrender.com)
+
 ## Features
 
 - 🔐 **User Authentication** - Secure login and registration with JWT
@@ -11,6 +16,7 @@ A modern, real-time chat application built with React, Node.js, Express, MongoDB
 - 👤 **Online Status** - Track who's currently online
 - 📱 **Responsive Design** - Works on desktop and mobile devices
 - 🎨 **Modern UI** - Beautiful interface with Tailwind CSS
+- 🕒 **Message Timestamps** - View when each message was sent
 
 ## Tech Stack
 
@@ -41,6 +47,7 @@ chat-app/
 │   ├── src/
 │   │   ├── components/      # Reusable React components
 │   │   ├── pages/          # Page components
+│   │   ├── config/         # API configuration
 │   │   ├── App.jsx         # Main app component
 │   │   └── main.jsx        # Entry point
 │   ├── package.json
@@ -159,6 +166,14 @@ The frontend will be running on `http://localhost:5173`
 3. **Start Chatting**: Click on a joined group to start chatting
 4. **Real-Time Features**: Enjoy real-time messaging, typing indicators, and online status
 
+## Deployment
+
+The application is deployed on:
+
+- **Frontend**: Vercel
+- **Backend**: Render
+- **Database**: MongoDB Atlas
+
 ## Contributing
 
 1. Fork the repository
@@ -167,4 +182,10 @@ The frontend will be running on `http://localhost:5173`
 4. Test thoroughly
 5. Submit a pull request
 
+## License
 
+This project is licensed under the MIT License.
+
+## Support
+
+If you encounter any issues or have questions, please open an issue on GitHub.

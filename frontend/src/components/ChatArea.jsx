@@ -27,7 +27,7 @@ const ChatArea = ({ selectedGroup, socket }) => {
   const fetchMessages = async () => {
     try {
       const { data } = await axios.get(
-        `http://localhost:5000/api/messages/${selectedGroup._id}`,
+        `https://full-stack-chat-application-zz0h.onrender.com/api/messages/${selectedGroup._id}`,
         {
           headers: { Authorization: `Bearer ${currentUser.token}` },
         }
@@ -108,7 +108,7 @@ const ChatArea = ({ selectedGroup, socket }) => {
     setLoading(true);
     try {
       const { data } = await axios.post(
-        "http://localhost:5000/api/messages",
+        "https://full-stack-chat-application-zz0h.onrender.com/api/messages",
         {
           content: newMessage,
           groupId: selectedGroup?._id,

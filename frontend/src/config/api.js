@@ -1,0 +1,22 @@
+// API Configuration
+const API_BASE_URL = "https://full-stack-chat-application-zz0h.onrender.com";
+const SOCKET_URL = "https://full-stack-chat-application-zz0h.onrender.com";
+
+// API Endpoints
+export const API_ENDPOINTS = {
+  // User endpoints
+  LOGIN: `${API_BASE_URL}/api/users/login`,
+  REGISTER: `${API_BASE_URL}/api/users/register`,
+
+  // Group endpoints
+  GROUPS: `${API_BASE_URL}/api/groups`,
+  JOIN_GROUP: (groupId) => `${API_BASE_URL}/api/groups/${groupId}/join`,
+  LEAVE_GROUP: (groupId) => `${API_BASE_URL}/api/groups/${groupId}/leave`,
+
+  // Message endpoints
+  MESSAGES: `${API_BASE_URL}/api/messages`,
+  GROUP_MESSAGES: (groupId) => `${API_BASE_URL}/api/messages/${groupId}`,
+};
+
+export { SOCKET_URL };
+export default API_BASE_URL;

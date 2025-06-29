@@ -46,11 +46,14 @@ const Sidebar = ({ setSelectedGroup }) => {
       const userInfo = checkAuth();
       if (!userInfo) return;
 
-      const { data } = await axios.get("http://localhost:5000/api/groups", {
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      });
+      const { data } = await axios.get(
+        "https://full-stack-chat-application-zz0h.onrender.com/api/groups",
+        {
+          headers: {
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+        }
+      );
       setGroups(data);
 
       const userGroupIds = data
@@ -81,7 +84,7 @@ const Sidebar = ({ setSelectedGroup }) => {
       if (!userInfo) return;
 
       await axios.post(
-        "http://localhost:5000/api/groups",
+        "https://full-stack-chat-application-zz0h.onrender.com/api/groups",
         {
           name: newGroupName,
           description: newGroupDescription,
@@ -110,7 +113,7 @@ const Sidebar = ({ setSelectedGroup }) => {
       const userInfo = checkAuth();
       if (!userInfo) return;
       await axios.post(
-        `http://localhost:5000/api/groups/${groupId}/join`,
+        `https://full-stack-chat-application-zz0h.onrender.com/api/groups/${groupId}/join`,
         {},
         {
           headers: {
@@ -134,7 +137,7 @@ const Sidebar = ({ setSelectedGroup }) => {
       const userInfo = checkAuth();
       if (!userInfo) return;
       await axios.post(
-        `http://localhost:5000/api/groups/${groupId}/leave`,
+        `https://full-stack-chat-application-zz0h.onrender.com/api/groups/${groupId}/leave`,
         {},
         {
           headers: {

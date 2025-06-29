@@ -14,14 +14,25 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173"],
+    origin: [
+      "http://localhost:5173",
+      "https://full-stack-chat-application-chi.vercel.app",
+    ],
     methods: ["GET", "POST"],
     credentials: true,
   },
 });
 
 //middlewares
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://full-stack-chat-application-chi.vercel.app",
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 //connect to database
@@ -47,5 +58,3 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
-
