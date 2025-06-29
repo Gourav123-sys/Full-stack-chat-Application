@@ -10,26 +10,28 @@ import {
   FiActivity,
   FiCheckCircle,
   FiUserCheck,
+  FiArrowRight,
+  FiStar,
 } from "react-icons/fi";
 
 const Feature = ({ title, text, icon, badges = [] }) => (
-  <div className="bg-white dark:bg-gray-800 rounded-xl p-6 space-y-4 border border-gray-100 dark:border-gray-700 hover:-translate-y-1 hover:shadow-xl transition-all">
-    <div className="w-16 h-16 flex items-center justify-center rounded-full bg-blue-500 text-white text-2xl mb-2">
+  <div className="card p-6 space-y-4 hover:-translate-y-2 transition-all duration-300 group">
+    <div className="w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-2xl mb-4 group-hover:scale-110 transition-transform duration-300">
       {icon}
     </div>
     <div>
-      <div className="flex items-center space-x-2 mb-2">
-        <span className="font-semibold text-lg">{title}</span>
+      <div className="flex items-center space-x-2 mb-3">
+        <span className="font-bold text-xl text-gray-800">{title}</span>
         {badges.map((badge, idx) => (
           <span
             key={idx}
-            className={`px-2 rounded-full text-xs bg-${badge.color}-100 text-${badge.color}-700`}
+            className={`px-3 py-1 rounded-full text-xs font-medium bg-${badge.color}-100 text-${badge.color}-700`}
           >
             {badge.text}
           </span>
         ))}
       </div>
-      <p className="text-gray-500 dark:text-gray-200">{text}</p>
+      <p className="text-gray-600 leading-relaxed">{text}</p>
     </div>
   </div>
 );
@@ -37,14 +39,16 @@ const Feature = ({ title, text, icon, badges = [] }) => (
 const ChatMessage = ({ message, sender, time, isUser }) => (
   <div className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}>
     <div
-      className={`rounded-lg px-4 py-2 max-w-[80%] ${
-        isUser ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800"
+      className={`rounded-2xl px-4 py-3 max-w-[80%] shadow-sm ${
+        isUser
+          ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
+          : "bg-white text-gray-800 border border-gray-100"
       }`}
     >
-      <div className="font-bold text-sm mb-1">{sender}</div>
-      <div>{message}</div>
+      <div className="font-semibold text-sm mb-1">{sender}</div>
+      <div className="text-sm">{message}</div>
       <div
-        className={`text-xs mt-1 ${isUser ? "text-white/70" : "text-gray-500"}`}
+        className={`text-xs mt-2 ${isUser ? "text-white/70" : "text-gray-500"}`}
       >
         {time}
       </div>
@@ -54,147 +58,210 @@ const ChatMessage = ({ message, sender, time, isUser }) => (
 
 export default function LandingPage() {
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto pt-10">
-        <div className="flex flex-col md:flex-row items-center space-y-8 md:space-y-0 md:space-x-10 py-20 md:py-28">
-          <div className="flex-1 space-y-10">
-            <h1 className="font-bold leading-tight text-4xl sm:text-5xl lg:text-6xl">
-              <span className="relative inline-block">
-                MasynTech
-                <span className="absolute left-0 bottom-1 w-full h-2 bg-blue-400 -z-10 rounded"></span>
-              </span>
-              <br />
-              <span className="text-blue-400">Chat App</span>
-            </h1>
-            <p className="text-gray-500 text-xl">
-              Experience seamless group communication with our modern chat
-              platform. Connect with teams, friends, and communities in
-              real-time with advanced features like typing indicators and online
-              status.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col lg:flex-row items-center space-y-12 lg:space-y-0 lg:space-x-16 py-20 lg:py-28">
+          <div className="flex-1 space-y-8 text-center lg:text-left">
+            <div className="space-y-4">
+              <h1 className="font-bold leading-tight text-5xl sm:text-6xl lg:text-7xl">
+                <span className="relative inline-block text-gray-800">
+                  Modern
+                  <span className="absolute left-0 bottom-2 w-full h-3 bg-gradient-to-r from-blue-400 to-indigo-500 -z-10 rounded-full opacity-30"></span>
+                </span>
+                <br />
+                <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  Chat App
+                </span>
+              </h1>
+              <p className="text-gray-600 text-xl lg:text-2xl leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                Experience seamless group communication with our modern chat
+                platform. Connect with teams, friends, and communities in
+                real-time with advanced features.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <RouterLink
                 to="/register"
-                className="inline-flex items-center justify-center rounded-full px-8 py-3 text-lg font-normal bg-blue-400 text-white hover:bg-blue-500 transition"
+                className="btn-primary px-8 py-4 text-lg font-semibold inline-flex items-center justify-center gap-2"
               >
-                <FiUserPlus className="mr-2" /> Get Started
+                <FiUserPlus className="text-xl" />
+                Get Started Free
+                <FiArrowRight className="text-lg" />
               </RouterLink>
               <RouterLink
                 to="/login"
-                className="inline-flex items-center justify-center rounded-full px-8 py-3 text-lg font-normal border border-blue-400 text-blue-400 hover:bg-blue-50 transition"
+                className="btn-secondary px-8 py-4 text-lg font-semibold inline-flex items-center justify-center gap-2"
               >
-                <FiLogIn className="mr-2" /> Sign In
+                <FiLogIn className="text-xl" />
+                Sign In
               </RouterLink>
             </div>
+
+            {/* Stats */}
+            <div className="flex flex-wrap justify-center lg:justify-start gap-8 pt-8">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-gray-800">10K+</div>
+                <div className="text-gray-600">Active Users</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-gray-800">500+</div>
+                <div className="text-gray-600">Groups Created</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-gray-800">99.9%</div>
+                <div className="text-gray-600">Uptime</div>
+              </div>
+            </div>
           </div>
+
           {/* Chat Preview */}
-          <div className="flex-1 flex justify-center items-center relative w-full">
-            <div className="relative h-[500px] w-full rounded-2xl shadow-2xl bg-white border border-gray-200 overflow-hidden">
+          <div className="flex-1 flex justify-center items-center relative w-full max-w-2xl">
+            <div className="relative h-[600px] w-full rounded-3xl shadow-2xl bg-white border border-gray-200 overflow-hidden animate-fadeIn">
               {/* Chat Header */}
-              <div className="absolute top-0 left-0 right-0 bg-blue-500 p-4 text-white border-b border-blue-600 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <FiUsers />
-                  <span className="font-bold">Team MasynTech</span>
+              <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white border-b border-blue-600 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <FiUsers className="text-xl" />
+                  </div>
+                  <div>
+                    <span className="font-bold text-lg">Team Chat</span>
+                    <div className="text-blue-100 text-sm">
+                      3 members online
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full">
-                    3 online
-                  </span>
-                  <FiGlobe />
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-sm">Live</span>
                 </div>
               </div>
+
               {/* Chat Messages */}
-              <div className="flex flex-col gap-4 p-4 pt-16 h-[calc(100%-120px)] overflow-y-auto">
+              <div className="flex flex-col gap-4 p-6 pt-20 h-[calc(100%-140px)] overflow-y-auto">
                 <ChatMessage
                   sender="Sarah Chen"
-                  message="Hey team! Just pushed the new updates to staging."
+                  message="Hey team! Just pushed the new updates to staging. 🚀"
                   time="10:30 AM"
                   isUser={false}
                 />
                 <ChatMessage
                   sender="Alex Thompson"
-                  message="Great work! The new features look amazing 🚀"
+                  message="Great work! The new features look amazing. Can't wait to test them!"
                   time="10:31 AM"
                   isUser={false}
                 />
                 <ChatMessage
                   sender="You"
-                  message="Thanks! Let's review it in our next standup."
+                  message="Thanks! Let's review it in our next standup meeting."
                   time="10:32 AM"
                   isUser={true}
                 />
                 <div className="w-full text-center">
-                  <span className="bg-gray-200 text-xs px-2 py-0.5 rounded-full">
-                    Sarah is typing...
-                  </span>
+                  <div className="inline-flex items-center gap-2 bg-gray-100 text-gray-600 text-sm px-4 py-2 rounded-full">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.1s" }}
+                      ></div>
+                      <div
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.2s" }}
+                      ></div>
+                    </div>
+                    <span>Sarah is typing...</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
         {/* Features Grid */}
-        <div className="py-20">
-          <div className="flex flex-col items-center mb-12 space-y-2 text-center">
-            <h2 className="text-4xl font-bold">Powerful Features</h2>
-            <p className="text-lg text-gray-500">
-              Everything you need for seamless team collaboration
+        <div className="py-24">
+          <div className="flex flex-col items-center mb-16 space-y-4 text-center">
+            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-4">
+              <FiStar className="text-2xl text-white" />
+            </div>
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-800">
+              Powerful Features
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl">
+              Everything you need for seamless team collaboration and
+              communication
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-4 md:px-8">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <Feature
-              icon={<FiLock className="w-10 h-10" />}
+              icon={<FiLock className="w-8 h-8" />}
               title="Secure Authentication"
               badges={[{ text: "Secure", color: "green" }]}
-              text="Register and login securely with email verification and encrypted passwords."
+              text="Register and login securely with email verification and encrypted passwords for maximum security."
             />
             <Feature
-              icon={<FiUsers className="w-10 h-10" />}
+              icon={<FiUsers className="w-8 h-8" />}
               title="Group Management"
               badges={[{ text: "Real-time", color: "blue" }]}
-              text="Create, join, or leave groups easily. Manage multiple conversations in one place."
+              text="Create, join, or leave groups easily. Manage multiple conversations in one place with intuitive controls."
             />
             <Feature
-              icon={<FiUserCheck className="w-10 h-10" />}
+              icon={<FiUserCheck className="w-8 h-8" />}
               title="Online Presence"
               badges={[{ text: "Live", color: "green" }]}
-              text="See who's currently online and active in your groups in real-time."
+              text="See who's currently online and active in your groups in real-time with status indicators."
             />
             <Feature
-              icon={<FiActivity className="w-10 h-10" />}
+              icon={<FiActivity className="w-8 h-8" />}
               title="Typing Indicators"
               badges={[{ text: "Interactive", color: "purple" }]}
-              text="Know when others are typing with real-time typing indicators."
+              text="Know when others are typing with real-time typing indicators and animated feedback."
             />
             <Feature
-              icon={<FiMessageSquare className="w-10 h-10" />}
+              icon={<FiMessageSquare className="w-8 h-8" />}
               title="Instant Messaging"
               badges={[{ text: "Fast", color: "orange" }]}
-              text="Send and receive messages instantly with real-time delivery and notifications."
+              text="Send and receive messages instantly with real-time delivery and push notifications."
             />
             <Feature
-              icon={<FiGlobe className="w-10 h-10" />}
+              icon={<FiGlobe className="w-8 h-8" />}
               title="Global Access"
               badges={[{ text: "24/7", color: "blue" }]}
-              text="Access your chats from anywhere, anytime with persistent connections."
+              text="Access your chats from anywhere, anytime with persistent connections and cloud sync."
             />
           </div>
         </div>
+
         {/* Call to Action */}
-        <div className="py-20">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-10 bg-blue-50 p-10 rounded-xl">
-            <div className="flex flex-col items-start gap-4">
-              <h3 className="text-2xl font-bold">Ready to get started?</h3>
-              <p className="text-lg text-gray-600">
-                Join thousands of users already using our platform
+        <div className="py-24">
+          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-3xl p-12 text-center text-white">
+            <div className="max-w-3xl mx-auto space-y-6">
+              <h3 className="text-4xl lg:text-5xl font-bold">
+                Ready to get started?
+              </h3>
+              <p className="text-xl text-blue-100 leading-relaxed">
+                Join thousands of users already using our platform for seamless
+                communication
               </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
+                <RouterLink
+                  to="/register"
+                  className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-8 py-4 rounded-xl text-lg transition-all duration-200 inline-flex items-center justify-center gap-2"
+                >
+                  <FiUserPlus className="text-xl" />
+                  Create Free Account
+                </RouterLink>
+                <RouterLink
+                  to="/login"
+                  className="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold px-8 py-4 rounded-xl text-lg transition-all duration-200 inline-flex items-center justify-center gap-2"
+                >
+                  <FiLogIn className="text-xl" />
+                  Sign In
+                </RouterLink>
+              </div>
             </div>
-            <RouterLink
-              to="/register"
-              className="inline-flex items-center justify-center px-8 py-3 text-lg font-medium bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-            >
-              <FiUserPlus className="mr-2" /> Create Free Account
-            </RouterLink>
           </div>
         </div>
       </div>

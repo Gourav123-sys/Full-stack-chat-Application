@@ -1,61 +1,62 @@
-import { FiUsers, FiCircle } from "react-icons/fi";
+import { FiUsers, FiWifi } from "react-icons/fi";
 
-const UsersList = ({ users, onlineUserIds = [] }) => {
+const UsersList = ({ users }) => {
   return (
-    <div className="h-full w-full border-l border-gray-200 bg-white relative overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center p-5 border-b border-gray-200 bg-white sticky top-0 z-10 shadow-sm">
-        <FiUsers className="text-blue-500 text-xl mr-2" />
-        <span className="text-lg font-bold text-gray-700">Members</span>
-        <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700">
-          {users.length}
-        </span>
+    <div className="h-full bg-white border-l border-gray-200 flex flex-col shadow-lg overflow-hidden">
+      {/* Header - Fixed */}
+      <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-blue-50 sticky top-0 z-10 flex-shrink-0">
+        <div className="flex items-center min-w-0">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-green-500 to-blue-600 rounded-lg flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
+            <FiWifi className="text-white text-lg sm:text-xl" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-800 truncate">
+              Online Users
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-500 truncate">
+              {users?.length || 0} connected
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Users List */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="flex flex-col gap-3">
-          {users.map((user) => {
-            const isOnline =
-              onlineUserIds.length === 0 || onlineUserIds.includes(user._id);
-            return (
-              <div key={user._id || user.id} className="group">
-                <div className="flex items-center p-3 bg-white rounded-lg shadow-sm border border-gray-100">
-                  <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold mr-3">
-                    {user.username[0]}
+      {/* Users List - Scrollable */}
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+        {users && users.length > 0 ? (
+          <div className="space-y-2 sm:space-y-3">
+            {users.map((user) => (
+              <div
+                key={user._id}
+                className="flex items-center p-2 sm:p-3 bg-white rounded-xl border border-gray-100 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
+              >
+                <div className="relative flex-shrink-0">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base">
+                    {user.username?.[0]?.toUpperCase() || "U"}
                   </div>
-                  <div className="flex-1">
-                    <span className="text-sm font-medium text-gray-700 truncate block">
-                      {user.username}
-                    </span>
-                  </div>
-                  <div
-                    className={`flex items-center px-2 py-1 rounded-full ml-2 ${
-                      isOnline ? "bg-green-50" : "bg-gray-100"
-                    }`}
-                  >
-                    <FiCircle
-                      className={`text-xs mr-1 ${
-                        isOnline ? "text-green-400" : "text-gray-400"
-                      }`}
-                    />
-                    <span
-                      className={`text-xs font-medium ${
-                        isOnline ? "text-green-600" : "text-gray-500"
-                      }`}
-                    >
-                      {isOnline ? "online" : "offline"}
-                    </span>
-                  </div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 border-2 border-white rounded-full"></div>
                 </div>
-                {/* Tooltip (simple) */}
-                <div className="hidden group-hover:block absolute ml-2 mt-1 bg-gray-800 text-white text-xs rounded px-2 py-1 z-20">
-                  {user.username} is {isOnline ? "online" : "offline"}
+                <div className="ml-2 sm:ml-3 flex-1 min-w-0">
+                  <div className="font-medium text-gray-800 text-sm sm:text-base truncate">
+                    {user.username}
+                  </div>
+                  <div className="text-xs sm:text-sm text-green-600 font-medium truncate">
+                    Online
+                  </div>
                 </div>
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
+            <FiUsers className="text-3xl sm:text-4xl text-gray-300 mb-2 sm:mb-3" />
+            <div className="text-sm sm:text-base font-medium mb-1">
+              No users online
+            </div>
+            <div className="text-xs sm:text-sm text-gray-400">
+              Users will appear here when they join
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

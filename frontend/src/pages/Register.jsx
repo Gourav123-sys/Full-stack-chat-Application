@@ -1,4 +1,11 @@
 import { Link } from "react-router-dom";
+import {
+  FiUser,
+  FiMail,
+  FiLock,
+  FiMessageCircle,
+  FiUserPlus,
+} from "react-icons/fi";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -33,104 +40,174 @@ const Register = () => {
   };
 
   return (
-    <div className="w-full h-screen flex items-center justify-center bg-gradient-to-r from-indigo-500 to-purple-500">
-      <div className="flex w-[95%] md:w-[90%] lg:w-[80%] xl:w-[75%] max-w-[1200px] h-auto md:h-auto lg:h-[600px] rounded-2xl overflow-hidden shadow-2xl">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 p-4">
+      <div className="flex w-full max-w-6xl h-auto lg:h-[700px] rounded-3xl overflow-hidden shadow-2xl bg-white">
         {/* Left Panel - Hidden on mobile */}
-        <div
-          className="hidden lg:flex w-1/2 bg-cover bg-center relative"
-          style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe')",
-          }}
-        >
-          <div className="absolute inset-0 bg-black bg-opacity-60 flex flex-col justify-center p-10 text-white">
-            <div className="text-4xl font-bold mb-4">
-              Join Our Chat Community
+        <div className="hidden lg:flex w-1/2 bg-cover bg-center relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-600/90 to-indigo-800/90"></div>
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe')] bg-cover bg-center mix-blend-overlay"></div>
+          <div className="relative z-10 flex flex-col justify-center p-12 text-white">
+            <div className="mb-8">
+              <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm">
+                <FiUserPlus className="text-3xl" />
+              </div>
+              <h1 className="text-5xl font-bold mb-4">Join Our Community</h1>
+              <p className="text-xl text-purple-100 leading-relaxed max-w-md">
+                Connect with friends and start chatting instantly. Be part of
+                our growing community!
+              </p>
             </div>
-            <div className="text-lg max-w-[400px]">
-              Connect with friends and start chatting instantly
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <span className="text-purple-100">Create your profile</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <span className="text-purple-100">
+                  Join group conversations
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <span className="text-purple-100">
+                  Start messaging instantly
+                </span>
+              </div>
             </div>
           </div>
         </div>
+
         {/* Right Panel - Registration Form */}
-        <div className="w-full lg:w-1/2 bg-white p-6 md:p-8 lg:p-10 flex flex-col justify-center">
-          <div className="block lg:hidden text-center mb-6">
-            <div className="text-2xl font-bold text-gray-800">
-              Create Account
+        <div className="w-full lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center">
+          <div className="max-w-md mx-auto w-full">
+            {/* Mobile Header */}
+            <div className="text-center lg:text-left mb-8">
+              <div className="lg:hidden w-16 h-16 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <FiUserPlus className="text-2xl text-white" />
+              </div>
+              <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-2">
+                Create Account
+              </h2>
+              <p className="text-gray-600">
+                Join our community and start chatting
+              </p>
             </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label
+                  htmlFor="username"
+                  className="block text-gray-700 font-medium mb-2"
+                >
+                  Username
+                </label>
+                <div className="relative">
+                  <FiUser className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 z-10" />
+                  <input
+                    id="username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Choose a username"
+                    className="input-field-with-icon"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-gray-700 font-medium mb-2"
+                >
+                  Email Address
+                </label>
+                <div className="relative">
+                  <FiMail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 z-10" />
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="input-field-with-icon"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-gray-700 font-medium mb-2"
+                >
+                  Password
+                </label>
+                <div className="relative">
+                  <FiLock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 z-10" />
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Create a password"
+                    className="input-field-with-icon"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-medium py-4 px-4 rounded-xl text-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <svg
+                      className="animate-spin h-5 w-5"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      ></path>
+                    </svg>
+                    Creating Account...
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center gap-2">
+                    <FiUserPlus className="text-lg" />
+                    Create Account
+                  </div>
+                )}
+              </button>
+
+              <div className="text-center">
+                <p className="text-gray-600">
+                  Already have an account?{" "}
+                  <Link
+                    to="/login"
+                    className="text-purple-600 font-semibold hover:text-purple-700 hover:underline transition-colors"
+                  >
+                    Sign in here
+                  </Link>
+                </p>
+              </div>
+            </form>
           </div>
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col gap-5 w-full max-w-[400px] mx-auto"
-          >
-            <div>
-              <label
-                htmlFor="username"
-                className="block text-gray-700 font-medium mb-1"
-              >
-                Username
-              </label>
-              <input
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                id="username"
-                type="text"
-                placeholder="Choose a username"
-                className="w-full py-3 px-4 bg-gray-50 border border-gray-200 rounded-lg focus:border-indigo-500 focus:outline-none"
-                required
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-gray-700 font-medium mb-1"
-              >
-                Email
-              </label>
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                className="w-full py-3 px-4 bg-gray-50 border border-gray-200 rounded-lg focus:border-indigo-500 focus:outline-none"
-                required
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-gray-700 font-medium mb-1"
-              >
-                Password
-              </label>
-              <input
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                id="password"
-                type="password"
-                placeholder="Create a password"
-                className="w-full py-3 px-4 bg-gray-50 border border-gray-200 rounded-lg focus:border-indigo-500 focus:outline-none"
-                required
-              />
-            </div>
-            <button
-              disabled={loading}
-              type="submit"
-              className="w-full py-3 bg-purple-500 text-white rounded-lg text-md font-medium mt-4 hover:bg-purple-600 transition-all disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:bg-purple-500"
-            >
-              {loading ? "Creating Account..." : "Create Account"}
-            </button>
-            <div className="text-gray-600 text-center pt-4">
-              Already have an account?{" "}
-              <Link
-                to="/login"
-                className="text-indigo-600 font-medium hover:underline"
-              >
-                Sign in
-              </Link>
-            </div>
-          </form>
         </div>
       </div>
     </div>

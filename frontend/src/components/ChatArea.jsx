@@ -1,5 +1,11 @@
 import { useEffect, useState, useRef } from "react";
-import { FiSend, FiInfo, FiMessageCircle, FiUsers } from "react-icons/fi";
+import {
+  FiSend,
+  FiInfo,
+  FiMessageCircle,
+  FiUsers,
+  FiSmile,
+} from "react-icons/fi";
 import UsersList from "./UsersList";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -11,6 +17,7 @@ const ChatArea = ({ selectedGroup, socket }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState(new Set());
   const [loading, setLoading] = useState(false);
+  const [showUsersList, setShowUsersList] = useState(false);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
@@ -43,16 +50,24 @@ const ChatArea = ({ selectedGroup, socket }) => {
     if (selectedGroup && socket) {
       fetchMessages();
       socket.emit("join room", selectedGroup?._id);
+
       socket.on("message recieved", (newMessage) => {
         setMessages((prev) => [...prev, newMessage]);
       });
 
       socket.on("Users in room", (users) => {
-        setConnectedUsers(users);
+        console.log("Users in room:", users);
+        setConnectedUsers(users || []);
       });
 
       socket.on("user joined", (user) => {
-        setConnectedUsers((prev) => [...prev, user]);
+        setConnectedUsers((prev) => {
+          const exists = prev.find((u) => u._id === user._id);
+          if (!exists) {
+            return [...prev, user];
+          }
+          return prev;
+        });
       });
 
       socket.on("user left", (userId) => {
@@ -73,7 +88,9 @@ const ChatArea = ({ selectedGroup, socket }) => {
       });
 
       socket.on("user typing", ({ username }) => {
-        setTypingUsers((prev) => new Set(prev).add(username));
+        if (username !== currentUser.username) {
+          setTypingUsers((prev) => new Set(prev).add(username));
+        }
       });
 
       socket.on("user stop typing", ({ username }) => {
@@ -135,17 +152,40 @@ const ChatArea = ({ selectedGroup, socket }) => {
     }
   };
 
-  // Format date and time
+  // Format date and time with proper AM/PM
   const formatDateTime = (dateString) => {
+    if (!dateString) return "";
+
     const date = new Date(dateString);
-    return date.toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
+    const now = new Date();
+    const diffInHours = (now - date) / (1000 * 60 * 60);
+    const diffInDays = (now - date) / (1000 * 60 * 60 * 24);
+
+    // Format time with AM/PM
+    const timeString = date.toLocaleTimeString("en-US", {
+      hour: "numeric",
       minute: "2-digit",
       hour12: true,
     });
+
+    // If same day, show only time
+    if (diffInHours < 24) {
+      return timeString;
+    }
+    // If within 7 days, show day and time
+    else if (diffInDays < 7) {
+      const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
+      return `${dayName} ${timeString}`;
+    }
+    // If older, show date and time
+    else {
+      const dateString = date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+      return `${dateString} ${timeString}`;
+    }
   };
 
   // handle typing
@@ -176,34 +216,49 @@ const ChatArea = ({ selectedGroup, socket }) => {
   };
 
   return (
-    <div className="flex h-full relative">
-      {/* Chat Area */}
-      <div className="flex-1 flex flex-col bg-gray-50 max-w-[calc(100%-260px)]">
-        {/* Chat Header */}
+    <div className="flex h-full relative bg-gray-50 overflow-hidden">
+      {/* Chat Area - Fixed layout */}
+      <div className="flex-1 flex flex-col bg-white lg:max-w-[calc(100%-260px)] overflow-hidden">
+        {/* Chat Header - Fixed */}
         {selectedGroup ? (
-          <div className="flex items-center px-6 py-4 bg-white border-b border-gray-200 shadow-sm">
-            <FiMessageCircle className="text-blue-500 text-2xl mr-3" />
-            <div className="flex-1">
-              <div className="text-lg font-bold text-gray-800">
-                {selectedGroup ? selectedGroup.name : "Select a group"}
+          <div className="flex items-center justify-between px-3 sm:px-4 lg:px-6 py-3 sm:py-4 bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
+            <div className="flex items-center flex-1 min-w-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
+                <FiMessageCircle className="text-white text-lg sm:text-xl" />
               </div>
-              <div className="text-sm text-gray-500">
-                {selectedGroup ? selectedGroup.description : ""}
+              <div className="flex-1 min-w-0">
+                <div className="text-base sm:text-lg font-bold text-gray-800 truncate">
+                  {selectedGroup.name}
+                </div>
+                <div className="text-xs sm:text-sm text-gray-500 truncate">
+                  {selectedGroup.description}
+                </div>
               </div>
             </div>
-            <FiInfo className="text-gray-400 text-xl cursor-pointer hover:text-blue-500" />
+            <div className="flex items-center gap-1 sm:gap-2">
+              <button
+                onClick={() => setShowUsersList(!showUsersList)}
+                className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
+                title="Toggle Users List"
+              >
+                <FiUsers className="text-gray-600 text-lg sm:text-xl" />
+              </button>
+              <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0">
+                <FiInfo className="text-gray-400 text-lg sm:text-xl hover:text-blue-500" />
+              </button>
+            </div>
           </div>
         ) : null}
 
-        {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto flex flex-col gap-4 px-6 py-4 relative scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-gray-100">
+        {/* Messages Area - Scrollable */}
+        <div className="flex-1 overflow-y-auto flex flex-col gap-3 sm:gap-4 px-3 sm:px-4 lg:px-6 py-3 sm:py-4 relative">
           {selectedGroup ? (
             <>
               {messages.length > 0 ? (
                 messages.map((message) => (
                   <div
                     key={message._id}
-                    className={`max-w-[70%] ${
+                    className={`max-w-[90%] sm:max-w-[85%] lg:max-w-[70%] message-bubble ${
                       message.sender._id === currentUser.id
                         ? "self-end"
                         : "self-start"
@@ -211,7 +266,7 @@ const ChatArea = ({ selectedGroup, socket }) => {
                   >
                     <div className="flex flex-col gap-1">
                       <div
-                        className={`flex items-center mb-1 gap-2 ${
+                        className={`flex items-center mb-1 gap-1 sm:gap-2 ${
                           message.sender._id === currentUser.id
                             ? "justify-end"
                             : "justify-start"
@@ -219,47 +274,61 @@ const ChatArea = ({ selectedGroup, socket }) => {
                       >
                         {message.sender._id === currentUser.id ? (
                           <>
-                            <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">
-                              {message.sender.username[0]}
-                            </div>
                             <span className="text-xs text-gray-500">You</span>
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
+                              {message.sender.username[0].toUpperCase()}
+                            </div>
                           </>
                         ) : (
                           <>
-                            <span className="text-xs text-gray-500">
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center text-white text-xs font-bold">
+                              {message.sender.username[0].toUpperCase()}
+                            </div>
+                            <span className="text-xs text-gray-500 font-medium">
                               {message.sender.username}
                             </span>
-                            <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">
-                              {message.sender.username[0]}
-                            </div>
                           </>
                         )}
                       </div>
                       <div
-                        className={`p-3 rounded-lg shadow-sm ${
+                        className={`p-2 sm:p-3 rounded-2xl shadow-sm ${
                           message.sender._id === currentUser.id
-                            ? "bg-blue-500 text-white"
-                            : "bg-white text-gray-800"
+                            ? "message-sent"
+                            : "message-received"
                         }`}
                       >
-                        <span>{message.content}</span>
+                        <span className="break-words text-sm sm:text-base">
+                          {message.content}
+                        </span>
                       </div>
-                      <div className="text-xs text-gray-400 mt-1 ml-1">
-                        {message.createdAt
-                          ? formatDateTime(message.createdAt)
-                          : ""}
+                      <div
+                        className={`text-xs text-gray-400 mt-1 ${
+                          message.sender._id === currentUser.id
+                            ? "text-right"
+                            : "text-left"
+                        }`}
+                      >
+                        {formatDateTime(message.createdAt)}
                       </div>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center text-gray-400">
-                  No messages yet.
+                <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
+                  <FiMessageCircle className="text-4xl sm:text-6xl text-gray-300 mb-3 sm:mb-4" />
+                  <div className="text-lg sm:text-xl font-semibold mb-2">
+                    No messages yet
+                  </div>
+                  <div className="text-xs sm:text-sm max-w-md mx-auto">
+                    Start the conversation by sending the first message!
+                  </div>
                 </div>
               )}
+
+              {/* Typing Indicator */}
               {typingUsers.size > 0 && (
-                <div className="self-start max-w-[70%]">
-                  <div className="flex items-center gap-2 p-2">
+                <div className="self-start max-w-[90%] sm:max-w-[85%] lg:max-w-[70%] animate-fadeIn">
+                  <div className="flex items-center gap-2 p-2 sm:p-3 bg-gray-100 rounded-2xl">
                     <div className="flex space-x-1">
                       <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                       <div
@@ -271,7 +340,7 @@ const ChatArea = ({ selectedGroup, socket }) => {
                         style={{ animationDelay: "0.2s" }}
                       ></div>
                     </div>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs sm:text-sm text-gray-600 font-medium">
                       {Array.from(typingUsers).join(", ")}{" "}
                       {typingUsers.size === 1 ? "is" : "are"} typing...
                     </span>
@@ -282,9 +351,13 @@ const ChatArea = ({ selectedGroup, socket }) => {
             </>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 select-none">
-              <FiUsers className="text-6xl text-blue-300 mb-4" />
-              <div className="text-2xl font-bold mb-2">No Group Selected</div>
-              <div className="text-md max-w-md mx-auto">
+              <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                <FiUsers className="text-2xl sm:text-4xl text-blue-400" />
+              </div>
+              <div className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 text-gray-700">
+                No Group Selected
+              </div>
+              <div className="text-sm sm:text-md max-w-md mx-auto text-gray-500 leading-relaxed">
                 Please select a group from the sidebar to start chatting.
                 <br />
                 You can join or create a group to begin your conversation!
@@ -293,20 +366,16 @@ const ChatArea = ({ selectedGroup, socket }) => {
           )}
         </div>
 
-        {/* Message Input */}
+        {/* Message Input - Fixed */}
         {selectedGroup ? (
           <form
             onSubmit={sendMessage}
-            className="p-4 bg-white border-t border-gray-200 relative z-10"
+            className="p-3 sm:p-4 bg-white border-t border-gray-200 relative z-10 flex-shrink-0"
           >
             <div className="relative">
               <input
-                className="w-full py-3 pl-4 pr-20 bg-gray-50 border-none focus:outline-none focus:bg-gray-100 rounded-lg text-base"
-                placeholder={
-                  selectedGroup
-                    ? "Type your message..."
-                    : "Select a group to chat"
-                }
+                className="w-full py-2 sm:py-3 pl-3 sm:pl-4 pr-16 sm:pr-20 bg-gray-50 border-none focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 rounded-2xl text-sm sm:text-base transition-all duration-200"
+                placeholder="Type your message..."
                 value={newMessage}
                 onChange={handleTyping}
                 disabled={!selectedGroup || loading}
@@ -314,19 +383,32 @@ const ChatArea = ({ selectedGroup, socket }) => {
               <button
                 type="submit"
                 disabled={!selectedGroup || loading || !newMessage.trim()}
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-16 flex items-center justify-center bg-blue-500 text-white rounded-full hover:translate-y-[-2px] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-md"
               >
-                <FiSend />
+                <FiSend className="text-sm sm:text-lg" />
               </button>
             </div>
           </form>
         ) : null}
       </div>
 
-      {/* UsersList with fixed width */}
-      <div className="w-[260px] sticky right-0 top-0 h-full flex-shrink-0">
+      {/* UsersList - Desktop - Fixed */}
+      <div className="hidden lg:block w-[260px] sticky right-0 top-0 h-full flex-shrink-0 overflow-hidden">
         {selectedGroup && <UsersList users={connectedUsers} />}
       </div>
+
+      {/* UsersList - Mobile Overlay with Blur */}
+      {showUsersList && selectedGroup && (
+        <div className="lg:hidden fixed inset-0 z-50">
+          <div
+            className="absolute inset-0 mobile-overlay-backdrop"
+            onClick={() => setShowUsersList(false)}
+          />
+          <div className="absolute right-0 top-0 h-full w-[280px] sm:w-80 bg-white shadow-2xl animate-slideInRight overflow-hidden">
+            <UsersList users={connectedUsers} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
