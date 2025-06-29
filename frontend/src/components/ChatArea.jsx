@@ -70,7 +70,6 @@ const ChatArea = ({ selectedGroup, socket }) => {
 
       // Listen for user joined
       socket.on("user joined", (user) => {
-        console.log("User joined:", user);
         setConnectedUsers((prev) => {
           const exists = prev.find((u) => u._id === user._id);
           if (!exists) {
@@ -82,7 +81,6 @@ const ChatArea = ({ selectedGroup, socket }) => {
 
       // Listen for user left
       socket.on("user left", (userId) => {
-        console.log("User left:", userId);
         setConnectedUsers((prev) =>
           prev.filter((user) => user?._id !== userId)
         );
@@ -90,15 +88,34 @@ const ChatArea = ({ selectedGroup, socket }) => {
 
       // Listen for notifications
       socket.on("notification", (notification) => {
-        console.log("Notification:", notification);
-        toast.info(notification.message, {
+        // Show different toast styles based on notification type
+        const toastConfig = {
           position: "top-right",
-          autoClose: 3000,
+          autoClose: 4000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-        });
+        };
+
+        if (notification.type === "USER JOINED") {
+          toast.success(notification.message, {
+            ...toastConfig,
+            icon: "👋",
+          });
+        } else if (notification.type === "USER LEFT") {
+          toast.info(notification.message, {
+            ...toastConfig,
+            icon: "👋",
+          });
+        } else if (notification.type === "USER DISCONNECTED") {
+          toast.warning(notification.message, {
+            ...toastConfig,
+            icon: "📴",
+          });
+        } else {
+          toast.info(notification.message, toastConfig);
+        }
       });
 
       // Listen for typing indicators

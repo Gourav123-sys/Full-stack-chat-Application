@@ -38,6 +38,23 @@ const socketIO = (io) => {
       if (connectedUsers.has(socket.id)) {
         // Remove user from connected user and notify others
         connectedUsers.delete(socket.id);
+
+        // Get updated list of users in the room
+        const userInRoom = Array.from(connectedUsers.values())
+          .filter((u) => u.room === groupId)
+          .map((u) => u.user);
+
+        // Emit updated user list to all clients in the room
+        io.in(groupId).emit("Users in room", userInRoom);
+
+        // Send leave notification to all other users in the room
+        socket.to(groupId).emit("notification", {
+          type: "USER LEFT",
+          message: `${user?.username} has left the room`,
+          user: user,
+        });
+
+        // Also emit user left event for immediate UI updates
         socket.to(groupId).emit("user left", user?._id);
       }
     });
@@ -58,10 +75,28 @@ const socketIO = (io) => {
       if (connectedUsers.has(socket.id)) {
         // Get user's room info before removing
         const userData = connectedUsers.get(socket.id);
-        // Notify others in the room about user's departure
-        socket.to(userData.room).emit("user left", user?._id);
+        const groupId = userData.room;
+
         // Remove user from connected Users
         connectedUsers.delete(socket.id);
+
+        // Get updated list of users in the room
+        const userInRoom = Array.from(connectedUsers.values())
+          .filter((u) => u.room === groupId)
+          .map((u) => u.user);
+
+        // Emit updated user list to all clients in the room
+        io.in(groupId).emit("Users in room", userInRoom);
+
+        // Notify others in the room about user's departure
+        socket.to(groupId).emit("notification", {
+          type: "USER DISCONNECTED",
+          message: `${user?.username} has gone offline`,
+          user: user,
+        });
+
+        // Also emit user left event for immediate UI updates
+        socket.to(groupId).emit("user left", user?._id);
       }
     });
     //end : disconnect handler

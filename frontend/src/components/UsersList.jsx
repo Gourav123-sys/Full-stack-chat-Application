@@ -14,7 +14,7 @@ const UsersList = ({ users }) => {
               Online Users
             </h2>
             <p className="text-xs sm:text-sm text-gray-500 truncate">
-              {users?.length || 0} connected
+              {users?.length || 0} {users?.length === 1 ? 'user' : 'users'} connected
             </p>
           </div>
         </div>
@@ -27,20 +27,21 @@ const UsersList = ({ users }) => {
             {users.map((user) => (
               <div
                 key={user._id}
-                className="flex items-center p-2 sm:p-3 bg-white rounded-xl border border-gray-100 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
+                className="flex items-center p-2 sm:p-3 bg-white rounded-xl border border-gray-100 hover:shadow-md transition-all duration-200 hover:-translate-y-1 animate-fadeIn"
               >
                 <div className="relative flex-shrink-0">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base">
                     {user.username?.[0]?.toUpperCase() || "U"}
                   </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 border-2 border-white rounded-full"></div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 border-2 border-white rounded-full animate-pulse"></div>
                 </div>
                 <div className="ml-2 sm:ml-3 flex-1 min-w-0">
                   <div className="font-medium text-gray-800 text-sm sm:text-base truncate">
                     {user.username}
                   </div>
-                  <div className="text-xs sm:text-sm text-green-600 font-medium truncate">
-                    Online
+                  <div className="text-xs sm:text-sm text-green-600 font-medium truncate flex items-center gap-1">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    Online now
                   </div>
                 </div>
               </div>

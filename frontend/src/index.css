@@ -28,7 +28,7 @@
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -45,12 +45,12 @@
   }
 }
 
-@keyframes slideInRight {
+@keyframes slideOut {
   from {
-    transform: translateX(100%);
+    transform: translateX(0);
   }
   to {
-    transform: translateX(0);
+    transform: translateX(-100%);
   }
 }
 
@@ -65,18 +65,18 @@
 }
 
 .animate-fadeIn {
-  animation: fadeIn 0.3s ease-in-out;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .animate-slideIn {
   animation: slideIn 0.3s ease-out;
 }
 
-.animate-slideInRight {
-  animation: slideInRight 0.3s ease-out;
+.animate-slideOut {
+  animation: slideOut 0.3s ease-in;
 }
 
-.animate-pulse-slow {
+.animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
@@ -212,11 +212,11 @@
   }
 
   .animate-fadeIn {
-    animation: fadeIn 0.3s ease-in-out;
+    animation: fadeIn 0.3s ease-out;
   }
 
-  .animate-slideInRight {
-    animation: slideInRight 0.3s ease-out;
+  .animate-slideOut {
+    animation: slideOut 0.3s ease-in;
   }
 
   .mobile-overlay-backdrop {
@@ -331,4 +331,32 @@
     transform: translateY(0);
     animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
   }
+}
+
+/* Mobile overlay blur effect */
+.mobile-overlay {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Toast customization */
+.Toastify__toast {
+  border-radius: 12px;
+  font-family: inherit;
+}
+
+.Toastify__toast--success {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.Toastify__toast--info {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.Toastify__toast--warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.Toastify__toast--error {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
 }
