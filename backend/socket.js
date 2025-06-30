@@ -68,6 +68,83 @@ const socketIO = (io) => {
     });
     //end : new message handler
 
+    //start : group events handler
+    // Join group request
+    socket.on("join group request", (data) => {
+      console.log("Join group request:", data);
+      // Notify admin of the group about the join request
+      io.emit("group join request", {
+        groupId: data.groupId,
+        groupName: data.groupName,
+        user: data.user,
+        timestamp: new Date(),
+      });
+    });
+
+    // Group joined (for regular groups or approved secure groups)
+    socket.on("group joined", (data) => {
+      console.log("Group joined:", data);
+      // Notify all users about the group update
+      io.emit("group updated", {
+        groupId: data.groupId,
+        groupName: data.groupName,
+        user: data.user,
+        action: "joined",
+        timestamp: new Date(),
+      });
+    });
+
+    // Group left
+    socket.on("group left", (data) => {
+      console.log("Group left:", data);
+      // Notify all users about the group update
+      io.emit("group updated", {
+        groupId: data.groupId,
+        groupName: data.groupName,
+        user: data.user,
+        action: "left",
+        timestamp: new Date(),
+      });
+    });
+
+    // Join request approved
+    socket.on("join request approved", (data) => {
+      console.log("Join request approved:", data);
+      // Notify the user who was approved
+      io.emit("join request status", {
+        groupId: data.groupId,
+        groupName: data.groupName,
+        user: data.user,
+        status: "approved",
+        timestamp: new Date(),
+      });
+    });
+
+    // Join request rejected
+    socket.on("join request rejected", (data) => {
+      console.log("Join request rejected:", data);
+      // Notify the user who was rejected
+      io.emit("join request status", {
+        groupId: data.groupId,
+        groupName: data.groupName,
+        user: data.user,
+        status: "rejected",
+        timestamp: new Date(),
+      });
+    });
+
+    // New group created
+    socket.on("group created", (data) => {
+      console.log("Group created:", data);
+      // Notify all users about the new group
+      io.emit("new group available", {
+        group: data.group,
+        createdBy: data.createdBy,
+        timestamp: new Date(),
+      });
+    });
+    //end : group events handler
+
     //start : disconnect handler
     // Triggered when user closes the connection
     socket.on("disconnect", () => {

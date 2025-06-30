@@ -5,7 +5,7 @@ import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import UserRouter from "./routes/userRoute.js";
-import GroupRouter from "./routes/groupRoute.js";
+import GroupRouter, { setSocketIO } from "./routes/groupRoute.js";
 import socketIO from "./socket.js";
 import messageRouter from "./routes/messageRouter.js";
 
@@ -49,6 +49,9 @@ mongoose
 
 //socket io
 socketIO(io);
+
+// Set socket.io instance for group routes
+setSocketIO(io);
 
 //routes
 app.use("/api/users", UserRouter);

@@ -14,7 +14,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config/api.js";
 
-const Sidebar = ({ setSelectedGroup }) => {
+const Sidebar = ({ setSelectedGroup, socket }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [groups, setGroups] = useState([]);
   const [userGroups, setUserGroups] = useState([]);
@@ -55,6 +55,66 @@ const Sidebar = ({ setSelectedGroup }) => {
       setIsAdmin(false);
     }
   };
+
+  // Socket event listeners for real-time updates
+  useEffect(() => {
+    if (!socket) return;
+
+    // Listen for new groups
+    socket.on("new group available", (data) => {
+      console.log("New group available:", data);
+      fetchGroups(); // Refresh groups list
+      toast.info(
+        `New group "${data.group.name}" created by ${data.createdBy.username}`
+      );
+    });
+
+    // Listen for group updates (join/leave)
+    socket.on("group updated", (data) => {
+      console.log("Group updated:", data);
+      fetchGroups(); // Refresh groups list
+
+      if (data.action === "joined") {
+        toast.success(`${data.user.username} joined "${data.groupName}"`);
+      } else if (data.action === "left") {
+        toast.info(`${data.user.username} left "${data.groupName}"`);
+      }
+    });
+
+    // Listen for join requests
+    socket.on("group join request", (data) => {
+      console.log("Join request received:", data);
+      if (data.user._id !== userInfo.id) {
+        // Don't show for own requests
+        toast.info(
+          `${data.user.username} requested to join "${data.groupName}"`
+        );
+      }
+      fetchGroups(); // Refresh to update pending requests
+    });
+
+    // Listen for join request status updates
+    socket.on("join request status", (data) => {
+      console.log("Join request status:", data);
+      if (data.user._id === userInfo.id) {
+        if (data.status === "approved") {
+          toast.success(
+            `Your request to join "${data.groupName}" was approved!`
+          );
+        } else if (data.status === "rejected") {
+          toast.error(`Your request to join "${data.groupName}" was rejected.`);
+        }
+        fetchGroups(); // Refresh groups list
+      }
+    });
+
+    return () => {
+      socket.off("new group available");
+      socket.off("group updated");
+      socket.off("group join request");
+      socket.off("join request status");
+    };
+  }, [socket, userInfo.id]);
 
   const fetchGroups = async () => {
     try {

@@ -70,6 +70,7 @@ const Chat = () => {
             setSelectedGroup(group);
             closeSidebar(); // Close sidebar on mobile when group is selected
           }}
+          socket={socket}
         />
       </div>
 

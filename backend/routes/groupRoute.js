@@ -4,6 +4,14 @@ import { protect, isAdmin } from "../middleware/authMiddleware.js";
 
 const groupRouter = express.Router();
 
+// Socket.io instance (will be set from server.js)
+let io;
+
+// Function to set socket.io instance
+export const setSocketIO = (socketIO) => {
+  io = socketIO;
+};
+
 //create a new group
 groupRouter.post("/", protect, isAdmin, async (req, res) => {
   try {
@@ -19,6 +27,16 @@ groupRouter.post("/", protect, isAdmin, async (req, res) => {
       .populate("admin", "username email")
       .populate("members", "username email")
       .populate("pendingMembers.user", "username email");
+
+    // Emit socket event for new group
+    if (io) {
+      io.emit("new group available", {
+        group: populatedGroup,
+        createdBy: req.user,
+        timestamp: new Date(),
+      });
+    }
+
     res.status(201).json(populatedGroup);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -86,6 +104,17 @@ groupRouter.post("/:groupId/join", protect, async (req, res) => {
         "Group pending members after request:",
         group.pendingMembers.map((m) => m.user.toString())
       );
+
+      // Emit socket event for join request
+      if (io) {
+        io.emit("group join request", {
+          groupId: group._id,
+          groupName: group.name,
+          user: req.user,
+          timestamp: new Date(),
+        });
+      }
+
       return res.json({
         message: "Join request sent. Awaiting admin approval.",
       });
@@ -93,6 +122,18 @@ groupRouter.post("/:groupId/join", protect, async (req, res) => {
       group.members.push(req.user._id);
       await group.save();
       console.log("Added to members for regular group");
+
+      // Emit socket event for group joined
+      if (io) {
+        io.emit("group updated", {
+          groupId: group._id,
+          groupName: group.name,
+          user: req.user,
+          action: "joined",
+          timestamp: new Date(),
+        });
+      }
+
       return res.json({ message: "Group joined successfully" });
     }
   } catch (error) {
@@ -120,6 +161,18 @@ groupRouter.post("/:groupId/leave", protect, async (req, res) => {
     }
     group.members.splice(memberIndex, 1);
     await group.save();
+
+    // Emit socket event for group left
+    if (io) {
+      io.emit("group updated", {
+        groupId: group._id,
+        groupName: group.name,
+        user: req.user,
+        action: "left",
+        timestamp: new Date(),
+      });
+    }
+
     res.json({ message: "Left the group successfully" });
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -158,9 +211,33 @@ groupRouter.post(
       );
       if (pendingIndex === -1)
         return res.status(404).json({ message: "No such pending request" });
-      group.members.push(group.pendingMembers[pendingIndex].user);
+
+      const approvedUser = group.pendingMembers[pendingIndex].user;
+      group.members.push(approvedUser);
       group.pendingMembers.splice(pendingIndex, 1);
       await group.save();
+
+      // Emit socket events for approval
+      if (io) {
+        // Notify about group update
+        io.emit("group updated", {
+          groupId: group._id,
+          groupName: group.name,
+          user: approvedUser,
+          action: "joined",
+          timestamp: new Date(),
+        });
+
+        // Notify the approved user specifically
+        io.emit("join request status", {
+          groupId: group._id,
+          groupName: group.name,
+          user: approvedUser,
+          status: "approved",
+          timestamp: new Date(),
+        });
+      }
+
       res.json({ message: "User approved and added to group" });
     } catch (error) {
       res.status(400).json({ message: error.message });
@@ -184,8 +261,22 @@ groupRouter.post(
       );
       if (pendingIndex === -1)
         return res.status(404).json({ message: "No such pending request" });
+
+      const rejectedUser = group.pendingMembers[pendingIndex].user;
       group.pendingMembers.splice(pendingIndex, 1);
       await group.save();
+
+      // Emit socket event for rejection
+      if (io) {
+        io.emit("join request status", {
+          groupId: group._id,
+          groupName: group.name,
+          user: rejectedUser,
+          status: "rejected",
+          timestamp: new Date(),
+        });
+      }
+
       res.json({ message: "User join request rejected" });
     } catch (error) {
       res.status(400).json({ message: error.message });
