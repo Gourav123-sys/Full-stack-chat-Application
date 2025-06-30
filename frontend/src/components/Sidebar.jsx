@@ -74,6 +74,18 @@ const Sidebar = ({ setSelectedGroup }) => {
         .map((group) => group._id);
       setUserGroups(userGroupIds);
 
+      console.log("User groups after fetch:", userGroupIds);
+      console.log(
+        "Groups data:",
+        groupsData.map((g) => ({
+          id: g._id,
+          name: g.name,
+          isSecure: g.isSecure,
+          members: g.members.map((m) => m._id),
+          pendingMembers: g.pendingMembers.map((p) => p.user._id),
+        }))
+      );
+
       // Fetch pending requests for admin groups
       const adminGroups = groupsData.filter(
         (group) => group.admin._id === userInfo.id
@@ -171,12 +183,13 @@ const Sidebar = ({ setSelectedGroup }) => {
       );
 
       await fetchGroups();
-      setSelectedGroup(groups.find((g) => g?._id === groupId));
 
-      if (group.isSecure) {
-        toast.success("Join request sent! Waiting for admin approval.");
-      } else {
+      // Only set selected group if it's not a secure group or user is already a member
+      if (!group.isSecure) {
+        setSelectedGroup(groups.find((g) => g?._id === groupId));
         toast.success("Joined the group successfully");
+      } else {
+        toast.success("Join request sent! Waiting for admin approval.");
       }
     } catch (error) {
       console.error("Failed to join group:", error);

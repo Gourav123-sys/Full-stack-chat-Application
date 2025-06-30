@@ -70,6 +70,7 @@ groupRouter.post("/:groupId/join", protect, async (req, res) => {
           (m) => m.user.toString() === req.user._id.toString()
         )
       ) {
+        console.log("User already has pending request for secure group");
         return res.status(400).json({
           message: "Already requested to join. Awaiting admin approval.",
         });
@@ -77,6 +78,14 @@ groupRouter.post("/:groupId/join", protect, async (req, res) => {
       group.pendingMembers.push({ user: req.user._id });
       await group.save();
       console.log("Added to pending members for secure group");
+      console.log(
+        "Group members after request:",
+        group.members.map((m) => m.toString())
+      );
+      console.log(
+        "Group pending members after request:",
+        group.pendingMembers.map((m) => m.user.toString())
+      );
       return res.json({
         message: "Join request sent. Awaiting admin approval.",
       });
