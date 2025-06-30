@@ -17,7 +17,8 @@ groupRouter.post("/", protect, isAdmin, async (req, res) => {
     });
     const populatedGroup = await Group.findById(group._id)
       .populate("admin", "username email")
-      .populate("members", "username email");
+      .populate("members", "username email")
+      .populate("pendingMembers.user", "username email");
     res.status(201).json(populatedGroup);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -29,7 +30,8 @@ groupRouter.get("/", protect, async (req, res) => {
   try {
     const groups = await Group.find()
       .populate("admin", "username email")
-      .populate("members", "username email");
+      .populate("members", "username email")
+      .populate("pendingMembers.user", "username email");
     res.json(groups);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -44,6 +46,18 @@ groupRouter.post("/:groupId/join", protect, async (req, res) => {
     if (!group) {
       return res.status(401).json({ message: "Group not found" });
     }
+
+    console.log("Join request:", {
+      groupId: req.params.groupId,
+      groupName: group.name,
+      isSecure: group.isSecure,
+      userId: req.user._id,
+      isAlreadyMember: group.members.includes(req.user._id),
+      hasPendingRequest: group.pendingMembers.some(
+        (m) => m.user.toString() === req.user._id.toString()
+      ),
+    });
+
     if (group.members.includes(req.user._id)) {
       return res.status(400).json({
         message: "Already a member of this group",
@@ -62,15 +76,18 @@ groupRouter.post("/:groupId/join", protect, async (req, res) => {
       }
       group.pendingMembers.push({ user: req.user._id });
       await group.save();
+      console.log("Added to pending members for secure group");
       return res.json({
         message: "Join request sent. Awaiting admin approval.",
       });
     } else {
       group.members.push(req.user._id);
       await group.save();
+      console.log("Added to members for regular group");
       return res.json({ message: "Group joined successfully" });
     }
   } catch (error) {
+    console.error("Join group error:", error);
     res.status(400).json({ message: error.message });
   }
 });

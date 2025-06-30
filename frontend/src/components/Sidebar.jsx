@@ -353,19 +353,29 @@ const Sidebar = ({ setSelectedGroup }) => {
               const isGroupAdmin = group.admin._id === userInfo.id;
               const hasPendingRequests = pendingRequests[group._id]?.length > 0;
 
+              // Check if user has a pending request for this group
+              const hasPendingRequest = group.pendingMembers?.some(
+                (member) => member.user._id === userInfo.id
+              );
+
+              // User can interact with group if they're joined, admin, or have pending request
+              const canInteract = isJoined || isGroupAdmin || hasPendingRequest;
+
               return (
                 <div
                   key={group._id}
                   className={`card p-3 sm:p-4 cursor-pointer transition-all duration-200 hover:shadow-lg ${
                     isJoined
                       ? "bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200"
+                      : hasPendingRequest
+                      ? "bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200"
                       : "bg-white border-gray-200"
                   } hover:-translate-y-1`}
                 >
                   <div className="flex justify-between items-start gap-2">
                     <div
                       className="flex-1 min-w-0"
-                      onClick={() => isJoined && setSelectedGroup(group)}
+                      onClick={() => canInteract && setSelectedGroup(group)}
                     >
                       <div className="flex items-center mb-2 gap-2">
                         <span className="font-bold text-gray-800 text-base sm:text-lg truncate">
@@ -380,6 +390,11 @@ const Sidebar = ({ setSelectedGroup }) => {
                         {isJoined && (
                           <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium flex-shrink-0">
                             ✓ Joined
+                          </span>
+                        )}
+                        {hasPendingRequest && (
+                          <span className="px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-700 font-medium flex-shrink-0">
+                            ⏳ Pending
                           </span>
                         )}
                         {isGroupAdmin && (
@@ -415,14 +430,22 @@ const Sidebar = ({ setSelectedGroup }) => {
                       )}
                       <button
                         onClick={() => {
-                          isJoined
-                            ? handleLeaveGroup(group._id)
-                            : handleJoinGroup(group._id);
+                          if (isJoined) {
+                            handleLeaveGroup(group._id);
+                          } else if (hasPendingRequest) {
+                            toast.info(
+                              "Request already sent! Waiting for admin approval."
+                            );
+                          } else {
+                            handleJoinGroup(group._id);
+                          }
                         }}
                         disabled={actionLoading === group._id}
                         className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-1 sm:gap-2 flex-shrink-0 ${
                           isJoined
                             ? "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+                            : hasPendingRequest
+                            ? "bg-gray-50 text-gray-500 border border-gray-200 cursor-not-allowed"
                             : "btn-primary"
                         } ${
                           actionLoading === group._id
@@ -454,6 +477,8 @@ const Sidebar = ({ setSelectedGroup }) => {
                         ) : null}
                         {isJoined
                           ? "Leave"
+                          : hasPendingRequest
+                          ? "Pending"
                           : group.isSecure
                           ? "Request"
                           : "Join"}
