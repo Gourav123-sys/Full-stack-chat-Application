@@ -358,24 +358,34 @@ const Sidebar = ({ setSelectedGroup }) => {
                 (member) => member.user._id === userInfo.id
               );
 
-              // User can interact with group if they're joined, admin, or have pending request
-              const canInteract = isJoined || isGroupAdmin || hasPendingRequest;
+              // User can interact with group if they're joined or admin (NOT pending requests)
+              const canInteract = isJoined || isGroupAdmin;
 
               return (
                 <div
                   key={group._id}
-                  className={`card p-3 sm:p-4 cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                  className={`card p-3 sm:p-4 transition-all duration-200 hover:shadow-lg ${
+                    canInteract ? "cursor-pointer" : "cursor-not-allowed"
+                  } ${
                     isJoined
                       ? "bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200"
                       : hasPendingRequest
                       ? "bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200"
                       : "bg-white border-gray-200"
-                  } hover:-translate-y-1`}
+                  } ${canInteract ? "hover:-translate-y-1" : ""}`}
                 >
                   <div className="flex justify-between items-start gap-2">
                     <div
                       className="flex-1 min-w-0"
-                      onClick={() => canInteract && setSelectedGroup(group)}
+                      onClick={() => {
+                        if (canInteract) {
+                          setSelectedGroup(group);
+                        } else if (hasPendingRequest) {
+                          toast.info(
+                            "You need admin approval to enter this secure group."
+                          );
+                        }
+                      }}
                     >
                       <div className="flex items-center mb-2 gap-2">
                         <span className="font-bold text-gray-800 text-base sm:text-lg truncate">
