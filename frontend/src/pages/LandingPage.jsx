@@ -81,14 +81,15 @@ export default function LandingPage() {
                 </span>
                 <br />
                 <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  ChatVerse
+                  Talksy
                 </span>
               </h1>
-              <p className="text-gray-600 text-xl lg:text-2xl leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                Experience seamless group communication with our modern chat
-                platform. Connect with teams, friends, and communities in
-                real-time with advanced features.
-              </p>
+              <div className="text-gray-600 text-xl lg:text-2xl leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                Experience seamless group communication with{" "}
+                <span className="font-bold text-blue-700">Talksy</span>, our
+                modern chat platform. Connect with teams, friends, and
+                communities in real-time with advanced features.
+              </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -136,7 +137,7 @@ export default function LandingPage() {
                     <FiUsers className="text-xl" />
                   </div>
                   <div>
-                    <span className="font-bold text-lg">Team ChatVerse</span>
+                    <span className="font-bold text-lg">Team Talksy</span>
                     <div className="text-blue-100 text-sm">
                       3 members online
                     </div>
@@ -249,7 +250,7 @@ export default function LandingPage() {
           <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-3xl p-12 text-center text-white">
             <div className="max-w-3xl mx-auto space-y-6">
               <h3 className="text-4xl lg:text-5xl font-bold">
-                Ready to join ChatVerse?
+                Ready to join Talksy?
               </h3>
               <p className="text-xl text-blue-100 leading-relaxed">
                 Join thousands of users already using our platform for seamless
@@ -275,33 +276,21 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
-      {/* Modern, Eye-Catching Footer */}
+      {/* Professional, Centered Footer */}
       <footer className="w-full bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-t border-gray-200 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
-          <div className="flex items-center gap-3 text-gray-700 text-base font-semibold">
-            <span className="inline-flex items-center gap-2">
-              <svg
-                width="22"
-                height="22"
-                fill="none"
-                viewBox="0 0 24 24"
-                className="inline-block text-blue-500"
-              >
-                <circle cx="12" cy="12" r="10" fill="#6366f1" />
-                <path
-                  d="M8 12l2.5 2.5L16 9"
-                  stroke="#fff"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Made with <span className="text-pink-500">♥</span> by{" "}
-              <span className="font-bold text-blue-600">Gourav Mondal</span>
-            </span>
+        <div className="max-w-3xl mx-auto px-4 py-8 flex flex-col items-center text-center gap-3">
+          <div className="text-lg font-bold text-blue-700">Talksy</div>
+          <div className="text-gray-600 text-base font-medium">
+            A modern real-time chat platform for teams, friends, and
+            communities. Welcome to{" "}
+            <span className="font-bold text-blue-700">Talksy</span>.
           </div>
-          <div className="text-gray-500 text-sm text-center md:text-right">
-            © {new Date().getFullYear()} ChatVerse. All rights reserved.
+          <div className="text-gray-700 text-base font-semibold">
+            Designed & Developed by{" "}
+            <span className="font-extrabold text-gray-900">Gourav Mondal</span>
+          </div>
+          <div className="text-gray-400 text-sm">
+            © {new Date().getFullYear()} Gourav Mondal. All rights reserved.
           </div>
         </div>
       </footer>

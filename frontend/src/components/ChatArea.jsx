@@ -552,7 +552,7 @@ const ChatArea = ({ selectedGroup, socket }) => {
               </div>
               <div className="text-sm sm:text-base max-w-md mx-auto text-gray-500 leading-relaxed">
                 Please select a group from the sidebar to start chatting in
-                ChatVerse.
+                Talksy.
                 <br />
                 You can join or create a group to begin your conversation!
               </div>

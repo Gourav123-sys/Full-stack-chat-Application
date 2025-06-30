@@ -90,7 +90,7 @@ const Chat = () => {
           </button>
           <div className="flex-1 text-center min-w-0 px-2">
             <h1 className="text-base sm:text-lg font-semibold text-gray-800 truncate">
-              {selectedGroup ? selectedGroup.name : "ChatVerse"}
+              {selectedGroup ? selectedGroup.name : "Talksy"}
             </h1>
           </div>
           <div className="w-10 flex-shrink-0"></div>{" "}

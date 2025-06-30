@@ -1,4 +1,4 @@
-# ChatVerse - Modern Chat Application
+# Talksy - Modern Chat Application
 
 A full-stack real-time chat application built with React, Node.js, Express, MongoDB, and Socket.IO. Features modern UI, file sharing, and admin security controls.
 
@@ -224,7 +224,7 @@ For support and questions:
 
 ---
 
-**ChatVerse** - Where conversations come to life with modern features and secure communication! 🚀
+**Talksy** - Where conversations come to life with modern features and secure communication! 🚀
 
 ## Project Structure
 
