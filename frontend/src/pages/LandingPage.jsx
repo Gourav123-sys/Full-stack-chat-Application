@@ -275,11 +275,35 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
-      {/* Minimalist Footer */}
-      <footer className="w-full py-6 bg-transparent flex justify-center items-center border-t border-gray-100 mt-12">
-        <span className="text-gray-400 text-sm">
-          © {new Date().getFullYear()} Gourav Mondal
-        </span>
+      {/* Modern, Eye-Catching Footer */}
+      <footer className="w-full bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-t border-gray-200 mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
+          <div className="flex items-center gap-3 text-gray-700 text-base font-semibold">
+            <span className="inline-flex items-center gap-2">
+              <svg
+                width="22"
+                height="22"
+                fill="none"
+                viewBox="0 0 24 24"
+                className="inline-block text-blue-500"
+              >
+                <circle cx="12" cy="12" r="10" fill="#6366f1" />
+                <path
+                  d="M8 12l2.5 2.5L16 9"
+                  stroke="#fff"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Made with <span className="text-pink-500">♥</span> by{" "}
+              <span className="font-bold text-blue-600">Gourav Mondal</span>
+            </span>
+          </div>
+          <div className="text-gray-500 text-sm text-center md:text-right">
+            © {new Date().getFullYear()} ChatVerse. All rights reserved.
+          </div>
+        </div>
       </footer>
     </div>
   );
