@@ -306,64 +306,16 @@ const ChatArea = ({ selectedGroup, socket }) => {
   // Format date and time with proper AM/PM
   const formatDateTime = (dateString) => {
     if (!dateString) return "";
-
     const date = new Date(dateString);
-    const now = new Date();
-    const diffInHours = (now - date) / (1000 * 60 * 60);
-    const diffInDays = (now - date) / (1000 * 60 * 60 * 24);
-
-    // Format time with AM/PM
-    const timeString = date.toLocaleTimeString("en-US", {
+    // Format: Apr 27, 2024, 10:30 AM
+    return date.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
     });
-
-    // If same day, show only time
-    if (diffInHours < 24) {
-      return timeString;
-    }
-    // If within 7 days, show day and time
-    else if (diffInDays < 7) {
-      const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
-      return `${dayName} ${timeString}`;
-    }
-    // If older, show date and time
-    else {
-      const dateString = date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-      return `${dateString} ${timeString}`;
-    }
-  };
-
-  // handle typing
-  const handleTyping = (e) => {
-    setNewMessage(e.target.value);
-    if (!isTyping && selectedGroup && socketConnected) {
-      setIsTyping(true);
-      socket.emit("typing", {
-        username: currentUser.username,
-        groupId: selectedGroup?._id,
-      });
-    }
-
-    // clear existing timeout
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
-
-    // set new timeout
-    typingTimeoutRef.current = setTimeout(() => {
-      if (selectedGroup && socketConnected) {
-        socket.emit("stop typing", {
-          groupId: selectedGroup?._id,
-        });
-      }
-      setIsTyping(false);
-    }, 2000);
   };
 
   // Render message content based on type
@@ -657,7 +609,7 @@ const ChatArea = ({ selectedGroup, socket }) => {
                 className="w-full py-3 sm:py-4 pl-4 sm:pl-6 pr-24 sm:pr-28 bg-gray-50 border-2 border-gray-200 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 rounded-2xl text-sm sm:text-base transition-all duration-200 placeholder-gray-500"
                 placeholder="Type your message..."
                 value={newMessage}
-                onChange={handleTyping}
+                onChange={(e) => setNewMessage(e.target.value)}
                 disabled={!selectedGroup || loading || !socketConnected}
               />
 

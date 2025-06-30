@@ -275,6 +275,12 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
+      {/* Minimalist Footer */}
+      <footer className="w-full py-6 bg-transparent flex justify-center items-center border-t border-gray-100 mt-12">
+        <span className="text-gray-400 text-sm">
+          © {new Date().getFullYear()} Gourav Mondal
+        </span>
+      </footer>
     </div>
   );
 }
