@@ -606,7 +606,7 @@ const ChatArea = ({ selectedGroup, socket }) => {
 
             <div className="relative">
               <input
-                className="w-full py-3 sm:py-4 pl-4 sm:pl-6 pr-24 sm:pr-28 bg-gray-50 border-2 border-gray-200 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 rounded-2xl text-sm sm:text-base transition-all duration-200 placeholder-gray-500"
+                className="w-full py-3 sm:py-4 pl-4 sm:pl-6 pr-36 bg-gray-50 border-2 border-gray-200 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 rounded-2xl text-sm sm:text-base transition-all duration-200 placeholder-gray-500"
                 placeholder="Type your message..."
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
