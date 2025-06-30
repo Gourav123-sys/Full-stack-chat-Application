@@ -20,6 +20,7 @@ export const API_ENDPOINTS = {
   // Secure group endpoints
   PENDING_REQUESTS: (groupId) =>
     `${API_BASE_URL}/api/groups/${groupId}/pending`,
+  ALL_PENDING_REQUESTS: `${API_BASE_URL}/api/groups/admin/pending`,
   APPROVE_REQUEST: (groupId, userId) =>
     `${API_BASE_URL}/api/groups/${groupId}/approve/${userId}`,
   REJECT_REQUEST: (groupId, userId) =>

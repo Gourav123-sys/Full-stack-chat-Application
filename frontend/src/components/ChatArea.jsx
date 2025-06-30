@@ -192,22 +192,24 @@ const ChatArea = ({ selectedGroup, socket }) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Check if it's an image
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file (JPG, PNG, GIF, WebP)");
+      return;
+    }
+
     // Check file size (10MB limit)
     if (file.size > 10 * 1024 * 1024) {
-      toast.error("File size must be less than 10MB");
+      toast.error("Image size must be less than 10MB");
       return;
     }
 
     setSelectedFile(file);
 
     // Create preview for images
-    if (file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onload = (e) => setFilePreview(e.target.result);
-      reader.readAsDataURL(file);
-    } else {
-      setFilePreview(null);
-    }
+    const reader = new FileReader();
+    reader.onload = (e) => setFilePreview(e.target.result);
+    reader.readAsDataURL(file);
   };
 
   // Remove selected file
@@ -284,6 +286,14 @@ const ChatArea = ({ selectedGroup, socket }) => {
     }
   };
 
+  // Get file icon based on mime type
+  const getFileIcon = (mimeType) => {
+    if (mimeType.startsWith("image/")) {
+      return "🖼️";
+    }
+    return "📎";
+  };
+
   // Format file size
   const formatFileSize = (bytes) => {
     if (bytes === 0) return "0 Bytes";
@@ -291,19 +301,6 @@ const ChatArea = ({ selectedGroup, socket }) => {
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
-
-  // Get file icon based on type
-  const getFileIcon = (mimeType) => {
-    if (mimeType.startsWith("image/"))
-      return <FiImage className="text-blue-500" />;
-    if (mimeType.includes("pdf")) return <FiFile className="text-red-500" />;
-    if (mimeType.includes("word") || mimeType.includes("document"))
-      return <FiFile className="text-blue-600" />;
-    if (mimeType.includes("excel") || mimeType.includes("spreadsheet"))
-      return <FiFile className="text-green-600" />;
-    if (mimeType.includes("text/")) return <FiFile className="text-gray-600" />;
-    return <FiFile className="text-gray-500" />;
   };
 
   // Format date and time with proper AM/PM
@@ -389,37 +386,6 @@ const ChatArea = ({ selectedGroup, socket }) => {
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200 rounded-lg flex items-center justify-center">
               <FiDownload className="text-white opacity-0 group-hover:opacity-100 transition-opacity text-2xl" />
             </div>
-          </div>
-        </div>
-      );
-    }
-
-    if (message.messageType === "document" || message.messageType === "file") {
-      return (
-        <div className="space-y-2">
-          {message.content && (
-            <span className="break-words text-sm sm:text-base">
-              {message.content}
-            </span>
-          )}
-          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border">
-            <div className="text-2xl">{getFileIcon(message.file.mimeType)}</div>
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-gray-800 text-sm truncate">
-                {message.file.originalName}
-              </p>
-              <p className="text-xs text-gray-500">
-                {formatFileSize(message.file.size)}
-              </p>
-            </div>
-            <a
-              href={message.file.url}
-              download={message.file.originalName}
-              className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
-              title="Download"
-            >
-              <FiDownload className="text-lg" />
-            </a>
           </div>
         </div>
       );
@@ -553,31 +519,9 @@ const ChatArea = ({ selectedGroup, socket }) => {
                                 }
                               >
                                 <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center text-white">
-                                  {message.messageType === "document" ? (
-                                    <svg
-                                      className="w-5 h-5"
-                                      fill="currentColor"
-                                      viewBox="0 0 20 20"
-                                    >
-                                      <path
-                                        fillRule="evenodd"
-                                        d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
-                                        clipRule="evenodd"
-                                      />
-                                    </svg>
-                                  ) : (
-                                    <svg
-                                      className="w-5 h-5"
-                                      fill="currentColor"
-                                      viewBox="0 0 20 20"
-                                    >
-                                      <path
-                                        fillRule="evenodd"
-                                        d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                                        clipRule="evenodd"
-                                      />
-                                    </svg>
-                                  )}
+                                  <div className="text-2xl">
+                                    {getFileIcon(message.file.mimeType)}
+                                  </div>
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-medium text-gray-800 truncate">
@@ -741,7 +685,7 @@ const ChatArea = ({ selectedGroup, socket }) => {
                 type="file"
                 onChange={handleFileSelect}
                 className="hidden"
-                accept="image/*,application/pdf,text/*,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                accept="image/*"
               />
 
               <button

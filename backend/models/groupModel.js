@@ -51,13 +51,7 @@ const groupSchema = new mongoose.Schema(
     allowedFileTypes: [
       {
         type: String,
-        default: [
-          "image/*",
-          "application/pdf",
-          "text/*",
-          "application/msword",
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        ],
+        default: ["image/*"],
       },
     ],
   },

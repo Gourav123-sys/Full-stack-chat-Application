@@ -20,18 +20,7 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary.v2,
   params: {
     folder: "chat-app",
-    allowed_formats: [
-      "jpg",
-      "jpeg",
-      "png",
-      "gif",
-      "pdf",
-      "doc",
-      "docx",
-      "txt",
-      "xls",
-      "xlsx",
-    ],
+    allowed_formats: ["jpg", "jpeg", "png", "gif", "webp"],
     transformation: [{ width: 1000, height: 1000, crop: "limit" }],
   },
 });
@@ -42,19 +31,13 @@ const upload = multer({
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
   fileFilter: (req, file, cb) => {
-    // Allow images, documents, and text files
+    // Only allow image files
     const allowedTypes = [
       "image/jpeg",
       "image/jpg",
       "image/png",
       "image/gif",
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "text/plain",
-      "text/csv",
-      "application/vnd.ms-excel",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "image/webp",
     ];
 
     if (allowedTypes.includes(file.mimetype)) {
@@ -62,7 +45,7 @@ const upload = multer({
     } else {
       cb(
         new Error(
-          "Invalid file type. Only images, documents, and text files are allowed."
+          "Invalid file type. Only image files (JPG, PNG, GIF, WebP) are allowed."
         ),
         false
       );
@@ -90,7 +73,7 @@ messageRouter.post("/", protect, async (req, res) => {
   }
 });
 
-//upload file and send message
+//upload image and send message
 messageRouter.post(
   "/file",
   protect,
@@ -101,46 +84,29 @@ messageRouter.post(
       const file = req.file;
 
       if (!file) {
-        return res.status(400).json({ message: "No file uploaded" });
-      }
-
-      // Determine message type based on file mimetype
-      let messageType = "file";
-      if (file.mimetype.startsWith("image/")) {
-        messageType = "image";
-      } else if (
-        file.mimetype.includes("pdf") ||
-        file.mimetype.includes("document") ||
-        file.mimetype.includes("text/")
-      ) {
-        messageType = "document";
+        return res.status(400).json({ message: "No image uploaded" });
       }
 
       // Create thumbnail for images
       let thumbnailUrl = null;
-      if (file.mimetype.startsWith("image/")) {
-        try {
-          const thumbnailResult = await cloudinary.v2.uploader.upload(
-            file.path,
-            {
-              folder: "chat-app/thumbnails",
-              width: 200,
-              height: 200,
-              crop: "fill",
-              quality: "auto",
-            }
-          );
-          thumbnailUrl = thumbnailResult.secure_url;
-        } catch (error) {
-          console.error("Error creating thumbnail:", error);
-        }
+      try {
+        const thumbnailResult = await cloudinary.v2.uploader.upload(file.path, {
+          folder: "chat-app/thumbnails",
+          width: 200,
+          height: 200,
+          crop: "fill",
+          quality: "auto",
+        });
+        thumbnailUrl = thumbnailResult.secure_url;
+      } catch (error) {
+        console.error("Error creating thumbnail:", error);
       }
 
       const message = await Message.create({
         content: content || `Sent ${file.originalname}`,
         group: groupId,
         sender: req.user._id,
-        messageType,
+        messageType: "image",
         file: {
           filename: file.filename,
           originalName: file.originalname,
@@ -158,7 +124,7 @@ messageRouter.post(
 
       res.json(populatedMessage);
     } catch (error) {
-      console.error("File upload error:", error);
+      console.error("Image upload error:", error);
       res.status(400).json({ message: error.message });
     }
   }

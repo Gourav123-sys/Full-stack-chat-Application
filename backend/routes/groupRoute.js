@@ -7,10 +7,11 @@ const groupRouter = express.Router();
 //create a new group
 groupRouter.post("/", protect, isAdmin, async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, isSecure } = req.body;
     const group = await Group.create({
       name,
       description,
+      isSecure: isSecure || false,
       admin: req.user._id,
       members: [req.user._id],
     });
@@ -55,11 +56,9 @@ groupRouter.post("/:groupId/join", protect, async (req, res) => {
           (m) => m.user.toString() === req.user._id.toString()
         )
       ) {
-        return res
-          .status(400)
-          .json({
-            message: "Already requested to join. Awaiting admin approval.",
-          });
+        return res.status(400).json({
+          message: "Already requested to join. Awaiting admin approval.",
+        });
       }
       group.pendingMembers.push({ user: req.user._id });
       await group.save();
@@ -167,5 +166,24 @@ groupRouter.post(
     }
   }
 );
+
+// Admin: get all pending join requests for groups where user is admin
+groupRouter.get("/admin/pending", protect, isAdmin, async (req, res) => {
+  try {
+    const groups = await Group.find({ admin: req.user._id, isSecure: true })
+      .populate("pendingMembers.user", "username email")
+      .select("name pendingMembers");
+
+    const pendingData = groups.map((group) => ({
+      groupId: group._id,
+      groupName: group.name,
+      pendingMembers: group.pendingMembers,
+    }));
+
+    res.json(pendingData);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
 
 export default groupRouter;

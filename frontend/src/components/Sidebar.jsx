@@ -61,22 +61,21 @@ const Sidebar = ({ setSelectedGroup }) => {
       const userInfo = checkAuth();
       if (!userInfo) return;
 
-      const { data } = await axios.get(API_ENDPOINTS.GROUPS, {
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`,
-        },
+      const { data: groupsData } = await axios.get(API_ENDPOINTS.GROUPS, {
+        headers: { Authorization: `Bearer ${userInfo.token}` },
       });
-      setGroups(data);
+      setGroups(groupsData);
 
-      const userGroupIds = data
+      // Set user groups
+      const userGroupIds = groupsData
         .filter((group) =>
           group.members.some((member) => member._id === userInfo.id)
         )
         .map((group) => group._id);
       setUserGroups(userGroupIds);
 
-      // Fetch pending requests for groups where user is admin
-      const adminGroups = data.filter(
+      // Fetch pending requests for admin groups
+      const adminGroups = groupsData.filter(
         (group) => group.admin._id === userInfo.id
       );
       const requestsData = {};
@@ -154,6 +153,13 @@ const Sidebar = ({ setSelectedGroup }) => {
     try {
       const userInfo = checkAuth();
       if (!userInfo) return;
+
+      const group = groups.find((g) => g._id === groupId);
+      if (!group) {
+        toast.error("Group not found");
+        return;
+      }
+
       await axios.post(
         API_ENDPOINTS.JOIN_GROUP(groupId),
         {},
@@ -163,18 +169,25 @@ const Sidebar = ({ setSelectedGroup }) => {
           },
         }
       );
+
       await fetchGroups();
       setSelectedGroup(groups.find((g) => g?._id === groupId));
-      toast.success("Joined the group successfully");
+
+      if (group.isSecure) {
+        toast.success("Join request sent! Waiting for admin approval.");
+      } else {
+        toast.success("Joined the group successfully");
+      }
     } catch (error) {
       console.error("Failed to join group:", error);
       const message = error.response?.data?.message || "Failed to join group";
-      toast.error(message);
 
-      // If it's a secure group, show different message
-      const group = groups.find((g) => g._id === groupId);
-      if (group?.isSecure && message.includes("not found")) {
-        toast.info("Request sent! Waiting for admin approval.");
+      if (message.includes("Already requested")) {
+        toast.info("Request already sent! Waiting for admin approval.");
+      } else if (message.includes("Already a member")) {
+        toast.info("You are already a member of this group.");
+      } else {
+        toast.error(message);
       }
     } finally {
       setActionLoading("");
