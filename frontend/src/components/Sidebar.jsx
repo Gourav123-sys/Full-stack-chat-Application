@@ -461,7 +461,7 @@ const Sidebar = ({ setSelectedGroup, socket }) => {
                       }}
                     >
                       <div className="flex items-center mb-2 gap-2">
-                        <span className="font-bold text-gray-800 text-base sm:text-lg truncate">
+                        <span className="font-bold text-gray-800 text-base sm:text-lg break-words whitespace-pre-line max-h-16 overflow-y-auto">
                           {group.name}
                         </span>
                         {group.isSecure && (
@@ -486,7 +486,7 @@ const Sidebar = ({ setSelectedGroup, socket }) => {
                           </span>
                         )}
                       </div>
-                      <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 leading-relaxed">
+                      <p className="text-xs sm:text-sm text-gray-600 break-words whitespace-pre-line leading-relaxed max-h-24 overflow-y-auto">
                         {group.description}
                       </p>
                       <div className="flex items-center mt-2 text-xs text-gray-500">

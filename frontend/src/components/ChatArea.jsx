@@ -369,10 +369,10 @@ const ChatArea = ({ selectedGroup, socket }) => {
                 <FiMessageCircle className="text-white text-lg sm:text-xl" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-lg sm:text-xl font-bold text-gray-800 truncate">
+                <div className="text-lg sm:text-xl font-bold text-gray-800 break-words max-h-16 overflow-y-auto">
                   {selectedGroup.name}
                 </div>
-                <div className="text-sm text-gray-500 truncate mt-1">
+                <div className="text-sm text-gray-500 break-words mt-1 max-h-20 overflow-y-auto">
                   {selectedGroup.description}
                 </div>
               </div>
