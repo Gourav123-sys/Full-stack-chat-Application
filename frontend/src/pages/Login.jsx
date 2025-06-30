@@ -1,5 +1,12 @@
 import { Link } from "react-router-dom";
-import { FiLogIn, FiMail, FiLock, FiMessageCircle } from "react-icons/fi";
+import {
+  FiLogIn,
+  FiMail,
+  FiLock,
+  FiMessageCircle,
+  FiEye,
+  FiEyeOff,
+} from "react-icons/fi";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -10,6 +17,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -116,13 +124,24 @@ const Login = () => {
                   <FiLock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 z-10" />
                   <input
                     id="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
                     className="input-field-with-icon"
                     required
                   />
+                  <button
+                    type="button"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 z-10 focus:outline-none"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    tabIndex={-1}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                  >
+                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                  </button>
                 </div>
               </div>
 
