@@ -411,52 +411,53 @@ const ChatArea = ({ selectedGroup, socket }) => {
       <div className="flex-1 flex flex-col bg-white lg:max-w-[calc(100%-260px)] overflow-hidden">
         {/* Chat Header - Fixed */}
         {selectedGroup ? (
-          <div className="flex items-center justify-between px-3 sm:px-4 lg:px-6 py-3 sm:py-4 bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
+          <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 sm:py-5 bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
             <div className="flex items-center flex-1 min-w-0">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0 shadow-sm">
                 <FiMessageCircle className="text-white text-lg sm:text-xl" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-base sm:text-lg font-bold text-gray-800 truncate">
+                <div className="text-lg sm:text-xl font-bold text-gray-800 truncate">
                   {selectedGroup.name}
                 </div>
-                <div className="text-xs sm:text-sm text-gray-500 truncate">
+                <div className="text-sm text-gray-500 truncate mt-1">
                   {selectedGroup.description}
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-1 sm:gap-2">
+            <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={() => setShowUsersList(!showUsersList)}
-                className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
+                className="lg:hidden p-2 sm:p-3 rounded-xl hover:bg-gray-100 transition-all duration-200 flex-shrink-0"
                 title="Toggle Users List"
               >
                 <FiUsers className="text-gray-600 text-lg sm:text-xl" />
               </button>
-              <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0">
-                <FiInfo className="text-gray-400 text-lg sm:text-xl hover:text-blue-500" />
+              <button className="p-2 sm:p-3 rounded-xl hover:bg-gray-100 transition-all duration-200 flex-shrink-0">
+                <FiInfo className="text-gray-400 text-lg sm:text-xl hover:text-blue-500 transition-colors" />
               </button>
             </div>
           </div>
         ) : null}
 
         {/* Messages Area - Scrollable */}
-        <div className="flex-1 overflow-y-auto flex flex-col gap-3 sm:gap-4 px-3 sm:px-4 lg:px-6 py-3 sm:py-4 relative">
+        <div className="flex-1 overflow-y-auto flex flex-col gap-4 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 relative bg-gray-50 messages-scrollbar">
           {selectedGroup ? (
             <>
               {messages.length > 0 ? (
                 messages.map((message) => (
                   <div
                     key={message._id}
-                    className={`max-w-[90%] sm:max-w-[85%] lg:max-w-[70%] message-bubble ${
+                    className={`max-w-[85%] sm:max-w-[80%] lg:max-w-[65%] xl:max-w-[60%] message-bubble ${
                       message.sender._id === currentUser.id
                         ? "self-end"
                         : "self-start"
                     }`}
                   >
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-2">
+                      {/* User info and timestamp */}
                       <div
-                        className={`flex items-center mb-1 gap-1 sm:gap-2 ${
+                        className={`flex items-center gap-2 ${
                           message.sender._id === currentUser.id
                             ? "justify-end"
                             : "justify-start"
@@ -464,113 +465,102 @@ const ChatArea = ({ selectedGroup, socket }) => {
                       >
                         {message.sender._id === currentUser.id ? (
                           <>
-                            <span className="text-xs text-gray-500">You</span>
-                            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
+                            <span className="text-xs text-gray-500 font-medium">
+                              You
+                            </span>
+                            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs sm:text-sm font-bold shadow-sm">
                               {message.sender.username[0].toUpperCase()}
                             </div>
                           </>
                         ) : (
                           <>
-                            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center text-white text-xs font-bold">
+                            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center text-white text-xs sm:text-sm font-bold shadow-sm">
                               {message.sender.username[0].toUpperCase()}
                             </div>
-                            <span className="text-xs text-gray-500 font-medium">
+                            <span className="text-xs text-gray-600 font-semibold">
                               {message.sender.username}
                             </span>
                           </>
                         )}
+                        <span className="text-xs text-gray-400 font-medium">
+                          {formatDateTime(message.createdAt)}
+                        </span>
                       </div>
+
+                      {/* Message content */}
                       <div
-                        className={`p-2 sm:p-3 rounded-2xl shadow-sm ${
+                        className={`p-3 sm:p-4 rounded-2xl shadow-sm border ${
                           message.sender._id === currentUser.id
-                            ? "message-sent"
-                            : "message-received"
-                        }`}
+                            ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-blue-400"
+                            : "bg-white text-gray-800 border-gray-200 hover:border-gray-300"
+                        } transition-all duration-200`}
                       >
                         {/* Text content */}
                         {message.content && (
-                          <span className="break-words text-sm sm:text-base block mb-2">
+                          <div className="break-words text-sm sm:text-base leading-relaxed mb-3">
                             {message.content}
-                          </span>
+                          </div>
                         )}
 
                         {/* File attachment */}
                         {message.file && (
-                          <div className="mt-2">
+                          <div className="mt-3">
                             {message.messageType === "image" ? (
                               <div className="relative group">
                                 <img
                                   src={message.file.url}
                                   alt={message.file.originalName}
-                                  className="max-w-full max-h-64 rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                                  className="max-w-full max-h-80 rounded-xl cursor-pointer hover:opacity-95 transition-all duration-200 shadow-md"
                                   onClick={() =>
                                     window.open(message.file.url, "_blank")
                                   }
                                 />
-                                <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                                  Click to view full size
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-200 rounded-xl flex items-center justify-center">
+                                  <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/70 text-white px-3 py-2 rounded-lg text-sm font-medium">
+                                    Click to view full size
+                                  </div>
                                 </div>
                               </div>
                             ) : (
                               <div
-                                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors cursor-pointer"
+                                className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-all duration-200 cursor-pointer group"
                                 onClick={() =>
                                   window.open(message.file.url, "_blank")
                                 }
                               >
-                                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center text-white">
+                                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-sm">
                                   <div className="text-2xl">
                                     {getFileIcon(message.file.mimeType)}
                                   </div>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium text-gray-800 truncate">
+                                  <p className="text-sm font-semibold text-gray-800 truncate">
                                     {message.file.originalName}
                                   </p>
-                                  <p className="text-xs text-gray-500">
-                                    {(message.file.size / 1024 / 1024).toFixed(
-                                      2
-                                    )}{" "}
-                                    MB
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    {formatFileSize(message.file.size)}
                                   </p>
                                 </div>
-                                <div className="text-blue-500">
-                                  <svg
-                                    className="w-5 h-5"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                  >
-                                    <path
-                                      fillRule="evenodd"
-                                      d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                                      clipRule="evenodd"
-                                    />
-                                  </svg>
+                                <div className="text-blue-500 group-hover:text-blue-600 transition-colors">
+                                  <FiDownload className="w-5 h-5" />
                                 </div>
                               </div>
                             )}
                           </div>
                         )}
                       </div>
-                      <div
-                        className={`text-xs text-gray-400 mt-1 ${
-                          message.sender._id === currentUser.id
-                            ? "text-right"
-                            : "text-left"
-                        }`}
-                      >
-                        {formatDateTime(message.createdAt)}
-                      </div>
                     </div>
                   </div>
                 ))
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
-                  <FiMessageCircle className="text-4xl sm:text-6xl text-gray-300 mb-3 sm:mb-4" />
-                  <div className="text-lg sm:text-xl font-semibold mb-2">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mb-6">
+                    <FiMessageCircle className="text-3xl sm:text-4xl text-blue-400" />
+                  </div>
+                  <div className="text-xl sm:text-2xl font-bold mb-3 text-gray-700">
                     No messages yet
                   </div>
-                  <div className="text-xs sm:text-sm max-w-md mx-auto">
+                  <div className="text-sm sm:text-base max-w-md mx-auto text-gray-500 leading-relaxed">
                     Start the conversation by sending the first message!
                   </div>
                 </div>
@@ -578,8 +568,8 @@ const ChatArea = ({ selectedGroup, socket }) => {
 
               {/* Typing Indicator */}
               {typingUsers.size > 0 && (
-                <div className="self-start max-w-[90%] sm:max-w-[85%] lg:max-w-[70%] animate-fadeIn">
-                  <div className="flex items-center gap-2 p-2 sm:p-3 bg-gray-100 rounded-2xl">
+                <div className="self-start max-w-[85%] sm:max-w-[80%] lg:max-w-[65%] xl:max-w-[60%] animate-fadeIn">
+                  <div className="flex items-center gap-3 p-3 sm:p-4 bg-white rounded-2xl border border-gray-200 shadow-sm">
                     <div className="flex space-x-1">
                       <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                       <div
@@ -591,7 +581,7 @@ const ChatArea = ({ selectedGroup, socket }) => {
                         style={{ animationDelay: "0.2s" }}
                       ></div>
                     </div>
-                    <span className="text-xs sm:text-sm text-gray-600 font-medium">
+                    <span className="text-sm text-gray-600 font-medium">
                       {Array.from(typingUsers).join(", ")}{" "}
                       {typingUsers.size === 1 ? "is" : "are"} typing...
                     </span>
@@ -602,13 +592,13 @@ const ChatArea = ({ selectedGroup, socket }) => {
             </>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 select-none">
-              <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mb-4 sm:mb-6">
-                <FiUsers className="text-2xl sm:text-4xl text-blue-400" />
+              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mb-6">
+                <FiUsers className="text-3xl sm:text-4xl text-blue-400" />
               </div>
-              <div className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 text-gray-700">
+              <div className="text-xl sm:text-2xl font-bold mb-3 text-gray-700">
                 No Group Selected
               </div>
-              <div className="text-sm sm:text-md max-w-md mx-auto text-gray-500 leading-relaxed">
+              <div className="text-sm sm:text-base max-w-md mx-auto text-gray-500 leading-relaxed">
                 Please select a group from the sidebar to start chatting in
                 ChatVerse.
                 <br />
@@ -622,29 +612,31 @@ const ChatArea = ({ selectedGroup, socket }) => {
         {selectedGroup ? (
           <form
             onSubmit={sendMessage}
-            className="p-3 sm:p-4 bg-white border-t border-gray-200 relative z-10 flex-shrink-0"
+            className="p-4 sm:p-6 bg-white border-t border-gray-200 relative z-10 flex-shrink-0"
           >
             {/* File Preview */}
             {selectedFile && (
-              <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     {filePreview ? (
                       <img
                         src={filePreview}
                         alt="Preview"
-                        className="w-12 h-12 object-cover rounded"
+                        className="w-16 h-16 object-cover rounded-lg shadow-sm"
                       />
                     ) : (
-                      <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
-                        {getFileIcon(selectedFile.type)}
+                      <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center shadow-sm">
+                        <div className="text-2xl">
+                          {getFileIcon(selectedFile.type)}
+                        </div>
                       </div>
                     )}
                     <div>
-                      <p className="font-medium text-sm text-gray-800 truncate max-w-48">
+                      <p className="font-semibold text-sm text-gray-800 truncate max-w-48">
                         {selectedFile.name}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 mt-1">
                         {formatFileSize(selectedFile.size)}
                       </p>
                     </div>
@@ -652,7 +644,7 @@ const ChatArea = ({ selectedGroup, socket }) => {
                   <button
                     type="button"
                     onClick={removeFile}
-                    className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all duration-200"
                   >
                     <FiX className="text-lg" />
                   </button>
@@ -662,7 +654,7 @@ const ChatArea = ({ selectedGroup, socket }) => {
 
             <div className="relative">
               <input
-                className="w-full py-2 sm:py-3 pl-3 sm:pl-4 pr-20 sm:pr-24 bg-gray-50 border-none focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 rounded-2xl text-sm sm:text-base transition-all duration-200"
+                className="w-full py-3 sm:py-4 pl-4 sm:pl-6 pr-24 sm:pr-28 bg-gray-50 border-2 border-gray-200 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 rounded-2xl text-sm sm:text-base transition-all duration-200 placeholder-gray-500"
                 placeholder="Type your message..."
                 value={newMessage}
                 onChange={handleTyping}
@@ -674,10 +666,10 @@ const ChatArea = ({ selectedGroup, socket }) => {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={!selectedGroup || loading || !socketConnected}
-                className="absolute right-16 sm:right-20 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center text-gray-400 hover:text-blue-500 rounded-full hover:bg-gray-100 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Attach file"
+                className="absolute right-20 sm:right-24 top-1/2 -translate-y-1/2 h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Attach image"
               >
-                <FiPaperclip className="text-sm sm:text-lg" />
+                <FiPaperclip className="text-lg sm:text-xl" />
               </button>
 
               <input
@@ -696,12 +688,12 @@ const ChatArea = ({ selectedGroup, socket }) => {
                   (!newMessage.trim() && !selectedFile) ||
                   !socketConnected
                 }
-                className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-md"
+                className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full hover:from-blue-600 hover:to-indigo-700 hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg hover:shadow-xl"
               >
                 {uploading ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <FiSend className="text-sm sm:text-lg" />
+                  <FiSend className="text-lg sm:text-xl" />
                 )}
               </button>
             </div>

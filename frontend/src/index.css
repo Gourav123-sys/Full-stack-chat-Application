@@ -101,7 +101,12 @@
 
 /* Message bubble animations */
 .message-bubble {
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeIn 0.4s ease-out;
+  transition: all 0.2s ease-in-out;
+}
+
+.message-bubble:hover {
+  transform: translateY(-1px);
 }
 
 /* Typing indicator */
@@ -182,11 +187,11 @@
 
 /* Message styles */
 .message-sent {
-  @apply bg-gradient-to-r from-blue-500 to-blue-600 text-white;
+  @apply bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md;
 }
 
 .message-received {
-  @apply bg-white text-gray-800 border border-gray-100;
+  @apply bg-white text-gray-800 border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200;
 }
 
 /* User card styles - Fixed for overlap */
@@ -359,4 +364,24 @@
 
 .Toastify__toast--error {
   background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+/* Improved scrollbar for messages */
+.messages-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.messages-scrollbar::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 4px;
+}
+
+.messages-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.messages-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
