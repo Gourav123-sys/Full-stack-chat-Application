@@ -1,9 +1,18 @@
 import { useEffect, useState } from "react";
-import { FiLogOut, FiPlus, FiUsers, FiX } from "react-icons/fi";
+import {
+  FiLogOut,
+  FiPlus,
+  FiUsers,
+  FiX,
+  FiShield,
+  FiCheck,
+  FiClock,
+  FiSettings,
+} from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
-import API_BASE_URL from "../config/api.js";
+import { API_ENDPOINTS } from "../config/api.js";
 
 const Sidebar = ({ setSelectedGroup }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,9 +20,14 @@ const Sidebar = ({ setSelectedGroup }) => {
   const [userGroups, setUserGroups] = useState([]);
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupDescription, setNewGroupDescription] = useState("");
+  const [isSecureGroup, setIsSecureGroup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [actionLoading, setActionLoading] = useState("");
+  const [pendingRequests, setPendingRequests] = useState({});
+  const [showPendingRequests, setShowPendingRequests] = useState(false);
+  const [selectedGroupForRequests, setSelectedGroupForRequests] =
+    useState(null);
   const navigate = useNavigate();
   const [userInfo] = useState(() => {
     try {
@@ -47,7 +61,7 @@ const Sidebar = ({ setSelectedGroup }) => {
       const userInfo = checkAuth();
       if (!userInfo) return;
 
-      const { data } = await axios.get(`${API_BASE_URL}/api/groups`, {
+      const { data } = await axios.get(API_ENDPOINTS.GROUPS, {
         headers: {
           Authorization: `Bearer ${userInfo.token}`,
         },
@@ -60,6 +74,32 @@ const Sidebar = ({ setSelectedGroup }) => {
         )
         .map((group) => group._id);
       setUserGroups(userGroupIds);
+
+      // Fetch pending requests for groups where user is admin
+      const adminGroups = data.filter(
+        (group) => group.admin._id === userInfo.id
+      );
+      const requestsData = {};
+
+      for (const group of adminGroups) {
+        if (group.isSecure) {
+          try {
+            const { data: requests } = await axios.get(
+              API_ENDPOINTS.PENDING_REQUESTS(group._id),
+              {
+                headers: { Authorization: `Bearer ${userInfo.token}` },
+              }
+            );
+            requestsData[group._id] = requests;
+          } catch (error) {
+            console.error(
+              `Failed to fetch pending requests for group ${group._id}:`,
+              error
+            );
+          }
+        }
+      }
+      setPendingRequests(requestsData);
     } catch (error) {
       console.error("Failed to fetch groups:", error);
       toast.error(error.response?.data?.message || "Failed to fetch groups");
@@ -83,10 +123,11 @@ const Sidebar = ({ setSelectedGroup }) => {
       if (!userInfo) return;
 
       await axios.post(
-        `${API_BASE_URL}/api/groups`,
+        API_ENDPOINTS.GROUPS,
         {
           name: newGroupName,
           description: newGroupDescription,
+          isSecure: isSecureGroup,
         },
         {
           headers: {
@@ -98,6 +139,7 @@ const Sidebar = ({ setSelectedGroup }) => {
       setIsOpen(false);
       setNewGroupName("");
       setNewGroupDescription("");
+      setIsSecureGroup(false);
       fetchGroups();
     } catch (error) {
       console.error("Failed to create group:", error);
@@ -113,7 +155,7 @@ const Sidebar = ({ setSelectedGroup }) => {
       const userInfo = checkAuth();
       if (!userInfo) return;
       await axios.post(
-        `${API_BASE_URL}/api/groups/${groupId}/join`,
+        API_ENDPOINTS.JOIN_GROUP(groupId),
         {},
         {
           headers: {
@@ -126,7 +168,14 @@ const Sidebar = ({ setSelectedGroup }) => {
       toast.success("Joined the group successfully");
     } catch (error) {
       console.error("Failed to join group:", error);
-      toast.error(error.response?.data?.message || "Failed to join group");
+      const message = error.response?.data?.message || "Failed to join group";
+      toast.error(message);
+
+      // If it's a secure group, show different message
+      const group = groups.find((g) => g._id === groupId);
+      if (group?.isSecure && message.includes("not found")) {
+        toast.info("Request sent! Waiting for admin approval.");
+      }
     } finally {
       setActionLoading("");
     }
@@ -138,7 +187,7 @@ const Sidebar = ({ setSelectedGroup }) => {
       const userInfo = checkAuth();
       if (!userInfo) return;
       await axios.post(
-        `${API_BASE_URL}/api/groups/${groupId}/leave`,
+        API_ENDPOINTS.LEAVE_GROUP(groupId),
         {},
         {
           headers: {
@@ -157,10 +206,59 @@ const Sidebar = ({ setSelectedGroup }) => {
     }
   };
 
+  const handleApproveRequest = async (groupId, userId) => {
+    try {
+      const userInfo = checkAuth();
+      if (!userInfo) return;
+
+      await axios.post(
+        API_ENDPOINTS.APPROVE_REQUEST(groupId, userId),
+        {},
+        {
+          headers: { Authorization: `Bearer ${userInfo.token}` },
+        }
+      );
+
+      toast.success("Request approved successfully");
+      await fetchGroups();
+    } catch (error) {
+      console.error("Failed to approve request:", error);
+      toast.error(error.response?.data?.message || "Failed to approve request");
+    }
+  };
+
+  const handleRejectRequest = async (groupId, userId) => {
+    try {
+      const userInfo = checkAuth();
+      if (!userInfo) return;
+
+      await axios.post(
+        API_ENDPOINTS.REJECT_REQUEST(groupId, userId),
+        {},
+        {
+          headers: { Authorization: `Bearer ${userInfo.token}` },
+        }
+      );
+
+      toast.success("Request rejected successfully");
+      await fetchGroups();
+    } catch (error) {
+      console.error("Failed to reject request:", error);
+      toast.error(error.response?.data?.message || "Failed to reject request");
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("userInfo");
     if (setSelectedGroup) setSelectedGroup(null);
     navigate("/login");
+  };
+
+  const getTotalPendingRequests = () => {
+    return Object.values(pendingRequests).reduce(
+      (total, requests) => total + requests.length,
+      0
+    );
   };
 
   return (
@@ -180,15 +278,29 @@ const Sidebar = ({ setSelectedGroup }) => {
             </p>
           </div>
         </div>
-        {isAdmin && (
-          <button
-            className="p-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-all duration-200 hover:scale-105 shadow-md flex-shrink-0"
-            title="Create New Group"
-            onClick={() => setIsOpen(true)}
-          >
-            <FiPlus className="text-lg" />
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {isAdmin && getTotalPendingRequests() > 0 && (
+            <button
+              onClick={() => setShowPendingRequests(true)}
+              className="relative p-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white transition-all duration-200 hover:scale-105 shadow-md flex-shrink-0"
+              title="Pending Requests"
+            >
+              <FiClock className="text-lg" />
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                {getTotalPendingRequests()}
+              </span>
+            </button>
+          )}
+          {isAdmin && (
+            <button
+              className="p-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-all duration-200 hover:scale-105 shadow-md flex-shrink-0"
+              title="Create New Group"
+              onClick={() => setIsOpen(true)}
+            >
+              <FiPlus className="text-lg" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* User Info - Fixed */}
@@ -204,6 +316,12 @@ const Sidebar = ({ setSelectedGroup }) => {
             <p className="text-xs sm:text-sm text-gray-500 truncate">
               {userInfo?.email || "user@example.com"}
             </p>
+            {isAdmin && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded-full mt-1">
+                <FiShield className="text-xs" />
+                Admin
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -219,6 +337,9 @@ const Sidebar = ({ setSelectedGroup }) => {
           ) : (
             groups.map((group) => {
               const isJoined = userGroups.includes(group?._id);
+              const isGroupAdmin = group.admin._id === userInfo.id;
+              const hasPendingRequests = pendingRequests[group._id]?.length > 0;
+
               return (
                 <div
                   key={group._id}
@@ -237,9 +358,20 @@ const Sidebar = ({ setSelectedGroup }) => {
                         <span className="font-bold text-gray-800 text-base sm:text-lg truncate">
                           {group.name}
                         </span>
+                        {group.isSecure && (
+                          <FiShield
+                            className="text-orange-500 text-sm"
+                            title="Secure Group"
+                          />
+                        )}
                         {isJoined && (
                           <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium flex-shrink-0">
                             ✓ Joined
+                          </span>
+                        )}
+                        {isGroupAdmin && (
+                          <span className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-700 font-medium flex-shrink-0">
+                            Admin
                           </span>
                         )}
                       </div>
@@ -249,49 +381,71 @@ const Sidebar = ({ setSelectedGroup }) => {
                       <div className="flex items-center mt-2 text-xs text-gray-500">
                         <FiUsers className="mr-1" />
                         {group.members?.length || 0} members
+                        {hasPendingRequests && (
+                          <span className="ml-2 px-2 py-1 bg-orange-100 text-orange-700 rounded-full">
+                            {pendingRequests[group._id].length} pending
+                          </span>
+                        )}
                       </div>
                     </div>
-                    <button
-                      onClick={() => {
-                        isJoined
-                          ? handleLeaveGroup(group._id)
-                          : handleJoinGroup(group._id);
-                      }}
-                      disabled={actionLoading === group._id}
-                      className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-1 sm:gap-2 flex-shrink-0 ${
-                        isJoined
-                          ? "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
-                          : "btn-primary"
-                      } ${
-                        actionLoading === group._id
-                          ? "opacity-70 cursor-not-allowed"
-                          : ""
-                      }`}
-                    >
-                      {actionLoading === group._id ? (
-                        <svg
-                          className="animate-spin h-3 w-3 sm:h-4 sm:w-4"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
+                    <div className="flex flex-col gap-2">
+                      {isGroupAdmin && hasPendingRequests && (
+                        <button
+                          onClick={() => {
+                            setSelectedGroupForRequests(group);
+                            setShowPendingRequests(true);
+                          }}
+                          className="px-2 py-1 text-xs bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
                         >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                          ></path>
-                        </svg>
-                      ) : null}
-                      {isJoined ? "Leave" : "Join"}
-                    </button>
+                          Review
+                        </button>
+                      )}
+                      <button
+                        onClick={() => {
+                          isJoined
+                            ? handleLeaveGroup(group._id)
+                            : handleJoinGroup(group._id);
+                        }}
+                        disabled={actionLoading === group._id}
+                        className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-1 sm:gap-2 flex-shrink-0 ${
+                          isJoined
+                            ? "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+                            : "btn-primary"
+                        } ${
+                          actionLoading === group._id
+                            ? "opacity-70 cursor-not-allowed"
+                            : ""
+                        }`}
+                      >
+                        {actionLoading === group._id ? (
+                          <svg
+                            className="animate-spin h-3 w-3 sm:h-4 sm:w-4"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                            ></path>
+                          </svg>
+                        ) : null}
+                        {isJoined
+                          ? "Leave"
+                          : group.isSecure
+                          ? "Request"
+                          : "Join"}
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -350,20 +504,176 @@ const Sidebar = ({ setSelectedGroup }) => {
                   Description
                 </label>
                 <textarea
-                  className="input-field resize-none text-sm sm:text-base"
-                  rows="3"
+                  className="input-field text-sm sm:text-base resize-none"
                   value={newGroupDescription}
                   onChange={(e) => setNewGroupDescription(e.target.value)}
                   placeholder="Enter group description"
+                  rows="3"
                 />
               </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="secureGroup"
+                  checked={isSecureGroup}
+                  onChange={(e) => setIsSecureGroup(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label
+                  htmlFor="secureGroup"
+                  className="text-sm text-gray-700 flex items-center gap-2"
+                >
+                  <FiShield className="text-orange-500" />
+                  Secure Group (Admin approval required)
+                </label>
+              </div>
               <button
-                className="w-full btn-primary mt-4 sm:mt-6 py-3 sm:py-4 text-sm sm:text-base"
                 onClick={handleCreateGroup}
-                disabled={loading}
+                disabled={
+                  loading || !newGroupName.trim() || !newGroupDescription.trim()
+                }
+                className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Creating..." : "Create Group"}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pending Requests Modal */}
+      {showPendingRequests && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-3 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-4 sm:p-6 relative animate-fadeIn max-h-[80vh] overflow-hidden flex flex-col">
+            <button
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 hover:text-gray-600 text-xl p-1 rounded-full hover:bg-gray-100 transition-colors"
+              onClick={() => {
+                setShowPendingRequests(false);
+                setSelectedGroupForRequests(null);
+              }}
+              aria-label="Close"
+            >
+              <FiX />
+            </button>
+            <div className="text-center mb-4 sm:mb-6">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <FiClock className="text-white text-xl sm:text-2xl" />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+                Pending Requests
+              </h2>
+              <p className="text-gray-500 mt-2 text-sm sm:text-base">
+                Review join requests for secure groups
+              </p>
+            </div>
+
+            <div className="flex-1 overflow-y-auto">
+              {selectedGroupForRequests ? (
+                <div>
+                  <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                    <h3 className="font-semibold text-gray-800">
+                      {selectedGroupForRequests.name}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {selectedGroupForRequests.description}
+                    </p>
+                  </div>
+
+                  {pendingRequests[selectedGroupForRequests._id]?.length > 0 ? (
+                    <div className="space-y-3">
+                      {pendingRequests[selectedGroupForRequests._id].map(
+                        (request) => (
+                          <div
+                            key={request.user._id}
+                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                {request.user.username[0].toUpperCase()}
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-800 text-sm">
+                                  {request.user.username}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {request.user.email}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() =>
+                                  handleApproveRequest(
+                                    selectedGroupForRequests._id,
+                                    request.user._id
+                                  )
+                                }
+                                className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
+                                title="Approve"
+                              >
+                                <FiCheck className="text-lg" />
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleRejectRequest(
+                                    selectedGroupForRequests._id,
+                                    request.user._id
+                                  )
+                                }
+                                className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                                title="Reject"
+                              >
+                                <FiX className="text-lg" />
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <FiClock className="text-4xl text-gray-300 mx-auto mb-3" />
+                      <p className="text-gray-500">
+                        No pending requests for this group
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {Object.entries(pendingRequests).map(
+                    ([groupId, requests]) => {
+                      const group = groups.find((g) => g._id === groupId);
+                      if (!group || requests.length === 0) return null;
+
+                      return (
+                        <div
+                          key={groupId}
+                          className="p-3 bg-gray-50 rounded-lg"
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <h3 className="font-semibold text-gray-800">
+                                {group.name}
+                              </h3>
+                              <p className="text-sm text-gray-600">
+                                {requests.length} pending request
+                                {requests.length > 1 ? "s" : ""}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => setSelectedGroupForRequests(group)}
+                              className="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                            >
+                              Review
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

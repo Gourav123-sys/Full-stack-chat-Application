@@ -17,9 +17,18 @@ export const API_ENDPOINTS = {
   JOIN_GROUP: (groupId) => `${API_BASE_URL}/api/groups/${groupId}/join`,
   LEAVE_GROUP: (groupId) => `${API_BASE_URL}/api/groups/${groupId}/leave`,
 
+  // Secure group endpoints
+  PENDING_REQUESTS: (groupId) =>
+    `${API_BASE_URL}/api/groups/${groupId}/pending`,
+  APPROVE_REQUEST: (groupId, userId) =>
+    `${API_BASE_URL}/api/groups/${groupId}/approve/${userId}`,
+  REJECT_REQUEST: (groupId, userId) =>
+    `${API_BASE_URL}/api/groups/${groupId}/reject/${userId}`,
+
   // Message endpoints
   MESSAGES: `${API_BASE_URL}/api/messages`,
   GROUP_MESSAGES: (groupId) => `${API_BASE_URL}/api/messages/${groupId}`,
+  UPLOAD_FILE: `${API_BASE_URL}/api/messages/file`,
 };
 
 export { SOCKET_URL };

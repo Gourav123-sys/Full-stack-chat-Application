@@ -8,6 +8,7 @@ import UserRouter from "./routes/userRoute.js";
 import GroupRouter from "./routes/groupRoute.js";
 import socketIO from "./socket.js";
 import messageRouter from "./routes/messageRouter.js";
+
 dotenv.config();
 
 const app = express();
@@ -33,7 +34,8 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 //connect to database
 mongoose

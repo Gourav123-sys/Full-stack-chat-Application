@@ -36,10 +36,10 @@ groupRouter.get("/", protect, async (req, res) => {
 });
 
 //join group
+// If group is secure, add to pendingMembers. Otherwise, add to members directly.
 groupRouter.post("/:groupId/join", protect, async (req, res) => {
   try {
     const group = await Group.findById(req.params.groupId);
-    console.log(group);
     if (!group) {
       return res.status(401).json({ message: "Group not found" });
     }
@@ -48,10 +48,29 @@ groupRouter.post("/:groupId/join", protect, async (req, res) => {
         message: "Already a member of this group",
       });
     }
-    group.members.push(req.user._id);
-    await group.save();
-
-    res.json({ message: "Group joined sucessfully" });
+    if (group.isSecure) {
+      // Check if already requested
+      if (
+        group.pendingMembers.some(
+          (m) => m.user.toString() === req.user._id.toString()
+        )
+      ) {
+        return res
+          .status(400)
+          .json({
+            message: "Already requested to join. Awaiting admin approval.",
+          });
+      }
+      group.pendingMembers.push({ user: req.user._id });
+      await group.save();
+      return res.json({
+        message: "Join request sent. Awaiting admin approval.",
+      });
+    } else {
+      group.members.push(req.user._id);
+      await group.save();
+      return res.json({ message: "Group joined successfully" });
+    }
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -81,5 +100,72 @@ groupRouter.post("/:groupId/leave", protect, async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 });
+
+// Admin: get pending join requests for a group
+groupRouter.get("/:groupId/pending", protect, isAdmin, async (req, res) => {
+  try {
+    const group = await Group.findById(req.params.groupId).populate(
+      "pendingMembers.user",
+      "username email"
+    );
+    if (!group) return res.status(404).json({ message: "Group not found" });
+    if (group.admin.toString() !== req.user._id.toString())
+      return res.status(403).json({ message: "Not group admin" });
+    res.json(group.pendingMembers);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Admin: approve join request
+groupRouter.post(
+  "/:groupId/approve/:userId",
+  protect,
+  isAdmin,
+  async (req, res) => {
+    try {
+      const group = await Group.findById(req.params.groupId);
+      if (!group) return res.status(404).json({ message: "Group not found" });
+      if (group.admin.toString() !== req.user._id.toString())
+        return res.status(403).json({ message: "Not group admin" });
+      const pendingIndex = group.pendingMembers.findIndex(
+        (m) => m.user.toString() === req.params.userId
+      );
+      if (pendingIndex === -1)
+        return res.status(404).json({ message: "No such pending request" });
+      group.members.push(group.pendingMembers[pendingIndex].user);
+      group.pendingMembers.splice(pendingIndex, 1);
+      await group.save();
+      res.json({ message: "User approved and added to group" });
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  }
+);
+
+// Admin: reject join request
+groupRouter.post(
+  "/:groupId/reject/:userId",
+  protect,
+  isAdmin,
+  async (req, res) => {
+    try {
+      const group = await Group.findById(req.params.groupId);
+      if (!group) return res.status(404).json({ message: "Group not found" });
+      if (group.admin.toString() !== req.user._id.toString())
+        return res.status(403).json({ message: "Not group admin" });
+      const pendingIndex = group.pendingMembers.findIndex(
+        (m) => m.user.toString() === req.params.userId
+      );
+      if (pendingIndex === -1)
+        return res.status(404).json({ message: "No such pending request" });
+      group.pendingMembers.splice(pendingIndex, 1);
+      await group.save();
+      res.json({ message: "User join request rejected" });
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  }
+);
 
 export default groupRouter;
