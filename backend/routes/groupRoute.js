@@ -213,6 +213,12 @@ groupRouter.post(
         return res.status(404).json({ message: "No such pending request" });
 
       const approvedUser = group.pendingMembers[pendingIndex].user;
+      // Populate the approved user
+      const populatedUser = await (
+        await import("../models/userModel.js")
+      ).default
+        .findById(approvedUser)
+        .select("username email _id");
       group.members.push(approvedUser);
       group.pendingMembers.splice(pendingIndex, 1);
       await group.save();
@@ -223,7 +229,7 @@ groupRouter.post(
         io.emit("group updated", {
           groupId: group._id,
           groupName: group.name,
-          user: approvedUser,
+          user: populatedUser,
           action: "joined",
           timestamp: new Date(),
         });
@@ -232,7 +238,7 @@ groupRouter.post(
         io.emit("join request status", {
           groupId: group._id,
           groupName: group.name,
-          user: approvedUser,
+          user: populatedUser,
           status: "approved",
           timestamp: new Date(),
         });
