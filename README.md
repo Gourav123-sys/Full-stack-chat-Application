@@ -1,80 +1,92 @@
-# Talksy - Modern Chat Application
+# Talksy - Modern Group Chat Platform
 
-A full-stack real-time chat application built with React, Node.js, Express, MongoDB, and Socket.IO. Features modern UI, file sharing, and admin security controls.
+A full-stack, real-time chat application for teams, friends, and communities. Built with React, Node.js, Express, MongoDB, and Socket.IO, Talksy features modern UI, secure group management, file sharing, and admin controls.
+
+---
 
 ## 🌐 Live Demo
 
-- **Frontend**: [https://full-stack-chat-application-chi.vercel.app/](https://full-stack-chat-application-chi.vercel.app/)
-- **Backend API**: [https://full-stack-chat-application-zz0h.onrender.com](https://full-stack-chat-application-zz0h.onrender.com)
+- **Frontend:** [https://full-stack-chat-application-chi.vercel.app/](https://full-stack-chat-application-chi.vercel.app/)
+- **Backend API:** [https://full-stack-chat-application-zz0h.onrender.com](https://full-stack-chat-application-zz0h.onrender.com)
+
+---
 
 ## 🚀 Features
 
-### Core Chat Features
+### Core Chat
 
-- **Real-time messaging** with Socket.IO
-- **Group chat** functionality
-- **Online/offline** user status
-- **Typing indicators**
-- **Message timestamps** with smart formatting
-- **Responsive design** for all devices
+- Real-time group messaging (Socket.IO)
+- Private and public groups
+- Online/offline user status
+- Typing indicators
+- Message timestamps
+- Responsive design (mobile & desktop)
 
-### 🔐 Security & Admin Features
+### Admin & Security
 
-- **Secure Groups**: Admins can create secure groups that require approval to join
-- **Admin Approval System**: Join requests for secure groups must be approved by group admins
-- **Pending Requests Management**: Admins can view and manage pending join requests
-- **User Authentication** with JWT tokens
-- **Admin Role Management**: Special admin privileges for group management
+- Secure groups (admin approval required to join)
+- Admin dashboard for managing join requests
+- JWT-based authentication
+- Admin role management
+- Audit trail for join requests
 
-### 📁 File Sharing
+### File Sharing
 
-- **Image Support**: Share and preview images directly in chat
-- **Document Sharing**: Upload and share PDFs, Word documents, Excel files
-- **Text Files**: Share text files and code snippets
-- **File Preview**: Images show thumbnails, documents show file info
-- **Download Support**: All files can be downloaded by recipients
-- **File Size Limits**: 10MB maximum file size
-- **Supported Formats**:
-  - Images: JPG, JPEG, PNG, GIF
-  - Documents: PDF, DOC, DOCX
-  - Spreadsheets: XLS, XLSX
-  - Text: TXT, CSV
+- Image, document, and text file sharing
+- File preview (thumbnails for images, info for docs)
+- Download support
+- File size limit: 10MB
+- Supported: JPG, PNG, GIF, PDF, DOCX, XLSX, TXT, CSV
 
-### 🎨 Modern UI/UX
+### Modern UI/UX
 
-- **Light Theme** with gradients and smooth animations
-- **Mobile Responsive** design with toggleable sidebar
-- **Glass Morphism** effects on mobile overlays
-- **Smooth Animations** and transitions
-- **Modern Chat Bubbles** with proper message styling
-- **File Attachment UI** with preview and download options
+- Light theme with gradients and glass morphism
+- Animated chat bubbles
+- Mobile-friendly sidebar
+- Smooth transitions and touch-friendly controls
+
+### Security
+
+- File type and size validation
+- Secure file storage (Cloudinary)
+- Access control: only group members can access files
+
+---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
 
-- **React 18** with Vite
-- **Socket.IO Client** for real-time communication
-- **Tailwind CSS** for styling
-- **React Icons** for beautiful icons
-- **React Router** for navigation
-- **Axios** for API calls
+- React 18 (Vite)
+- Tailwind CSS
+- Socket.IO Client
+- React Router
+- React Icons
+- Axios
 
 ### Backend
 
-- **Node.js** with Express
-- **MongoDB** with Mongoose
-- **Socket.IO** for real-time features
-- **JWT** for authentication
-- **Multer** for file uploads
-- **Cloudinary** for file storage
-- **Sharp** for image processing
+- Node.js + Express
+- MongoDB + Mongoose
+- Socket.IO
+- JWT (jsonwebtoken)
+- Multer (file uploads)
+- Cloudinary (file storage)
+- Sharp (image processing)
 
-## 📦 Installation
+### Deployment
+
+- **Frontend:** Vercel
+- **Backend:** Render
+- **Database:** MongoDB Atlas
+
+---
+
+## 📦 Setup & Installation
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js (v16+)
 - MongoDB database
 - Cloudinary account (for file storage)
 
@@ -107,100 +119,54 @@ npm run dev
 ```bash
 cd frontend
 npm install
-```
-
-Start the frontend:
-
-```bash
 npm run dev
 ```
 
+---
+
 ## 🔧 Configuration
 
-### Environment Variables
+- All environment variables must be set in your deployment platform for production.
+- File uploads are limited to 10MB and validated for type.
 
-- `MONGO_URI`: MongoDB connection string
-- `JWT_SECRET`: Secret key for JWT tokens
-- `CLOUDINARY_CLOUD_NAME`: Your Cloudinary cloud name
-- `CLOUDINARY_API_KEY`: Cloudinary API key
-- `CLOUDINARY_API_SECRET`: Cloudinary API secret
-- `PORT`: Server port (default: 5000)
+---
 
-### File Upload Settings
+## 📱 Usage Guide
 
-- Maximum file size: 10MB
-- Supported file types: Images, PDFs, Documents, Text files
-- File storage: Cloudinary (with automatic image optimization)
+### 1. Register & Login
 
-## 📱 Usage
+- Create an account or login with your credentials.
 
-### Creating Groups
+### 2. Create or Join Groups
 
-1. **Regular Groups**: Anyone can join immediately
-2. **Secure Groups**:
-   - Created by admins only
-   - Require admin approval to join
-   - Show shield icon in group list
+- Browse available groups or create a new one (admins only for secure groups).
+- Join public groups instantly, or request to join secure groups (admin approval required).
 
-### File Sharing
+### 3. Chat & Share Files
 
-1. Click the paperclip icon in the chat input
-2. Select a file (images, documents, etc.)
-3. Add optional message text
-4. Send the message
-5. Files are automatically uploaded and shared
+- Send messages in real-time.
+- Attach images or documents using the paperclip icon.
+- See who is online and who is typing.
 
-### Admin Features
+### 4. Admin Features
 
-1. **Create Groups**: Admins can create new groups
-2. **Manage Secure Groups**: Set groups as secure requiring approval
-3. **Review Requests**: View and approve/reject join requests
-4. **Pending Requests Counter**: Shows number of pending requests
+- Approve or reject join requests for secure groups.
+- See pending requests and manage group members.
 
-### Mobile Experience
+### 5. Mobile Experience
 
-- **Toggleable Sidebar**: Slide-in sidebar on mobile
-- **Responsive Design**: Optimized for all screen sizes
-- **Touch-Friendly**: Large touch targets and smooth gestures
+- Responsive sidebar and chat area.
+- Touch-friendly controls and smooth animations.
 
-## 🔒 Security Features
-
-### Group Security
-
-- **Secure Groups**: Only admins can create secure groups
-- **Approval System**: Join requests must be approved by group admin
-- **Request Management**: Admins can approve or reject requests
-- **Audit Trail**: All join requests are tracked with timestamps
-
-### File Security
-
-- **File Type Validation**: Only allowed file types can be uploaded
-- **Size Limits**: 10MB maximum file size
-- **Secure Storage**: Files stored in Cloudinary with secure URLs
-- **Access Control**: Only group members can access shared files
+---
 
 ## 🚀 Deployment
 
-### Backend Deployment
+- **Frontend:** Deploy to Vercel, Netlify, or similar. (Vercel live: https://full-stack-chat-application-chi.vercel.app/)
+- **Backend:** Deploy to Render, Railway, Heroku, etc. (Render live: https://full-stack-chat-application-zz0h.onrender.com)
+- **Database:** MongoDB Atlas or self-hosted MongoDB.
 
-The backend can be deployed to platforms like:
-
-- Heroku
-- Railway
-- Render
-- DigitalOcean
-
-### Frontend Deployment
-
-The frontend can be deployed to:
-
-- Vercel
-- Netlify
-- GitHub Pages
-
-### Environment Setup
-
-Make sure to set all required environment variables in your deployment platform.
+---
 
 ## 🤝 Contributing
 
@@ -210,21 +176,42 @@ Make sure to set all required environment variables in your deployment platform.
 4. Test thoroughly
 5. Submit a pull request
 
+---
+
 ## 📄 License
 
-This project is licensed under the MIT License.
-
-## 🆘 Support
-
-For support and questions:
-
-- Create an issue in the repository
-- Check the documentation
-- Review the code comments
+MIT License
 
 ---
 
-**Talksy** - Where conversations come to life with modern features and secure communication! 🚀
+## 🆘 Support
+
+- For issues, open a GitHub issue or contact the maintainer.
+- Designed & Developed by Gourav Mondal
+
+---
+
+## 📚 API & Socket Events (Quick Reference)
+
+### REST API
+
+- `/api/users/register` - Register
+- `/api/users/login` - Login
+- `/api/groups` - List/Create groups
+- `/api/groups/:groupId/join` - Join group
+- `/api/groups/:groupId/leave` - Leave group
+- `/api/messages/:groupId` - Get messages
+- `/api/messages` - Send message
+
+### Socket.IO Events
+
+- `join room` / `leave room`
+- `new message`
+- `user typing` / `user stop typing`
+- `notification` (join/leave/disconnect)
+- `group updated` (admin actions)
+
+---
 
 ## Project Structure
 
