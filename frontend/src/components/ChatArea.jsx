@@ -31,6 +31,7 @@ const ChatArea = ({ selectedGroup, socket }) => {
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const fileInputRef = useRef(null);
+  const lastJoinedGroupRef = useRef(null);
 
   // Handle typing indicator
   const handleTyping = (e) => {
@@ -88,8 +89,14 @@ const ChatArea = ({ selectedGroup, socket }) => {
     if (selectedGroup && socket) {
       fetchMessages();
 
-      // Join room
-      socket.emit("join room", selectedGroup?._id);
+      // Only join room if group has changed
+      if (lastJoinedGroupRef.current !== selectedGroup._id) {
+        if (lastJoinedGroupRef.current) {
+          socket.emit("leave room", lastJoinedGroupRef.current);
+        }
+        socket.emit("join room", selectedGroup._id);
+        lastJoinedGroupRef.current = selectedGroup._id;
+      }
 
       // Listen for new messages
       socket.on("message recieved", (newMessage) => {
@@ -174,7 +181,11 @@ const ChatArea = ({ selectedGroup, socket }) => {
 
       // Cleanup function
       return () => {
-        socket.emit("leave room", selectedGroup?._id);
+        // Only leave room if we are actually in it
+        if (lastJoinedGroupRef.current) {
+          socket.emit("leave room", lastJoinedGroupRef.current);
+          lastJoinedGroupRef.current = null;
+        }
         socket.off("message recieved");
         socket.off("Users in room");
         socket.off("user joined");
