@@ -86,126 +86,130 @@ const ChatArea = ({ selectedGroup, socket }) => {
 
   // Fetch messages for the selected group
   useEffect(() => {
-    if (selectedGroup && socket) {
-      fetchMessages();
+    if (!selectedGroup || !socket) return;
 
-      // Only join room if group has changed
-      if (lastJoinedGroupRef.current !== selectedGroup._id) {
-        if (lastJoinedGroupRef.current) {
-          socket.emit("leave room", lastJoinedGroupRef.current);
-        }
-        socket.emit("join room", selectedGroup._id);
-        lastJoinedGroupRef.current = selectedGroup._id;
+    fetchMessages();
+
+    // Only join room if group has changed
+    if (lastJoinedGroupRef.current !== selectedGroup._id) {
+      if (lastJoinedGroupRef.current) {
+        socket.emit("leave room", lastJoinedGroupRef.current);
       }
-
-      // Listen for new messages
-      socket.on("message recieved", (newMessage) => {
-        console.log("New message received:", newMessage);
-        setMessages((prev) => [...prev, newMessage]);
-      });
-
-      // Listen for users in room
-      socket.on("Users in room", (users) => {
-        console.log("Users in room:", users);
-        setConnectedUsers(users || []);
-      });
-
-      // Listen for user joined
-      socket.on("user joined", (user) => {
-        setConnectedUsers((prev) => {
-          const exists = prev.find(
-            (u) => (u?.id || u?._id) === (user?.id || user?._id)
-          );
-          if (!exists) {
-            return [...prev, user];
-          }
-          return prev;
-        });
-      });
-
-      // Listen for user left
-      socket.on("user left", (userId) => {
-        setConnectedUsers((prev) =>
-          prev.filter((user) => (user?.id || user?._id) !== userId)
-        );
-      });
-
-      // Listen for notifications
-      socket.on("notification", (notification) => {
-        // Show different toast styles based on notification type
-        const toastConfig = {
-          position: "top-right",
-          autoClose: 4000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        };
-
-        if (notification.type === "USER JOINED") {
-          toast.success(notification.message, {
-            ...toastConfig,
-            icon: "👋",
-          });
-        } else if (notification.type === "USER LEFT") {
-          toast.info(notification.message, {
-            ...toastConfig,
-            icon: "👋",
-          });
-        } else if (notification.type === "USER DISCONNECTED") {
-          toast.warning(notification.message, {
-            ...toastConfig,
-            icon: "📴",
-          });
-        } else {
-          toast.info(notification.message, toastConfig);
-        }
-      });
-
-      // Listen for typing indicators
-      socket.on("user typing", ({ username }) => {
-        console.log("User typing:", username);
-        if (username !== currentUser.username) {
-          setTypingUsers((prev) => new Set(prev).add(username));
-        }
-      });
-
-      socket.on("user stop typing", ({ username }) => {
-        console.log("User stopped typing:", username);
-        setTypingUsers((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(username);
-          return newSet;
-        });
-      });
-
-      // Cleanup function
-      return () => {
-        // Only leave room if we are actually in it
-        if (lastJoinedGroupRef.current) {
-          socket.emit("leave room", lastJoinedGroupRef.current);
-          lastJoinedGroupRef.current = null;
-        }
-        socket.off("message recieved");
-        socket.off("Users in room");
-        socket.off("user joined");
-        socket.off("user left");
-        socket.off("notification");
-        socket.off("user typing");
-        socket.off("user stop typing");
-        if (typingTimeoutRef.current) {
-          clearTimeout(typingTimeoutRef.current);
-        }
-        // Stop typing indicator when leaving room
-        if (isTyping) {
-          socket.emit("stop typing", {
-            groupId: selectedGroup?._id,
-          });
-          setIsTyping(false);
-        }
-      };
+      socket.emit("join room", selectedGroup._id);
+      lastJoinedGroupRef.current = selectedGroup._id;
     }
-  }, [selectedGroup, socket, currentUser.username, isTyping]);
+
+    // Listen for new messages
+    const onMessageReceived = (newMessage) => {
+      setMessages((prev) => [...prev, newMessage]);
+    };
+    socket.on("message recieved", onMessageReceived);
+
+    // Listen for users in room
+    const onUsersInRoom = (users) => setConnectedUsers(users || []);
+    socket.on("Users in room", onUsersInRoom);
+
+    // Listen for user joined
+    const onUserJoined = (user) => {
+      setConnectedUsers((prev) => {
+        const exists = prev.find(
+          (u) => (u?.id || u?._id) === (user?.id || user?._id)
+        );
+        if (!exists) {
+          return [...prev, user];
+        }
+        return prev;
+      });
+    };
+    socket.on("user joined", onUserJoined);
+
+    // Listen for user left
+    const onUserLeft = (userId) => {
+      setConnectedUsers((prev) =>
+        prev.filter((user) => (user?.id || user?._id) !== userId)
+      );
+    };
+    socket.on("user left", onUserLeft);
+
+    // Listen for notifications
+    const onNotification = (notification) => {
+      // Only show join/leave/disconnect toasts for other users
+      if (
+        notification.user?.id === currentUser.id ||
+        notification.user?._id === currentUser.id
+      ) {
+        return;
+      }
+      const toastConfig = {
+        position: "top-right",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      };
+      if (notification.type === "USER JOINED") {
+        toast.success(notification.message, {
+          ...toastConfig,
+          icon: "👋",
+        });
+      } else if (notification.type === "USER LEFT") {
+        toast.info(notification.message, {
+          ...toastConfig,
+          icon: "👋",
+        });
+      } else if (notification.type === "USER DISCONNECTED") {
+        toast.warning(notification.message, {
+          ...toastConfig,
+          icon: "📴",
+        });
+      } else {
+        toast.info(notification.message, toastConfig);
+      }
+    };
+    socket.on("notification", onNotification);
+
+    // Listen for typing indicators
+    const onUserTyping = ({ username }) => {
+      if (username !== currentUser.username) {
+        setTypingUsers((prev) => new Set(prev).add(username));
+      }
+    };
+    socket.on("user typing", onUserTyping);
+
+    const onUserStopTyping = ({ username }) => {
+      setTypingUsers((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(username);
+        return newSet;
+      });
+    };
+    socket.on("user stop typing", onUserStopTyping);
+
+    // Cleanup function
+    return () => {
+      if (lastJoinedGroupRef.current) {
+        socket.emit("leave room", lastJoinedGroupRef.current);
+        lastJoinedGroupRef.current = null;
+      }
+      socket.off("message recieved", onMessageReceived);
+      socket.off("Users in room", onUsersInRoom);
+      socket.off("user joined", onUserJoined);
+      socket.off("user left", onUserLeft);
+      socket.off("notification", onNotification);
+      socket.off("user typing", onUserTyping);
+      socket.off("user stop typing", onUserStopTyping);
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      if (isTyping) {
+        socket.emit("stop typing", {
+          groupId: selectedGroup?._id,
+        });
+        setIsTyping(false);
+      }
+    };
+  }, [selectedGroup, socket]);
 
   // Monitor socket connection status
   useEffect(() => {

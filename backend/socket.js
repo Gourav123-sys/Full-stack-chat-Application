@@ -10,6 +10,11 @@ const socketIO = (io) => {
 
     //start : join room handler
     socket.on("join room", (groupId) => {
+      // Check if user is already in the room
+      const alreadyInRoom = Array.from(connectedUsers.values()).some(
+        (u) => u.user?.id === user?.id && u.room === groupId
+      );
+      if (alreadyInRoom) return;
       //add socket to the specified room
       socket.join(groupId);
       //store user and room info in connected users map
