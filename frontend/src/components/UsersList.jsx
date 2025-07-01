@@ -14,7 +14,8 @@ const UsersList = ({ users }) => {
               Online Users
             </h2>
             <p className="text-xs sm:text-sm text-gray-500 truncate">
-              {users?.length || 0} {users?.length === 1 ? 'user' : 'users'} connected
+              {users?.length || 0} {users?.length === 1 ? "user" : "users"}{" "}
+              connected
             </p>
           </div>
         </div>
@@ -26,7 +27,7 @@ const UsersList = ({ users }) => {
           <div className="space-y-2 sm:space-y-3">
             {users.map((user) => (
               <div
-                key={user._id}
+                key={user?.id || user?._id}
                 className="flex items-center p-2 sm:p-3 bg-white rounded-xl border border-gray-100 hover:shadow-md transition-all duration-200 hover:-translate-y-1 animate-fadeIn"
               >
                 <div className="relative flex-shrink-0">

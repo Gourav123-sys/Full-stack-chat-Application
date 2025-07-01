@@ -32,6 +32,32 @@ const ChatArea = ({ selectedGroup, socket }) => {
   const typingTimeoutRef = useRef(null);
   const fileInputRef = useRef(null);
 
+  // Handle typing indicator
+  const handleTyping = (e) => {
+    setNewMessage(e.target.value);
+
+    if (!isTyping) {
+      setIsTyping(true);
+      socket.emit("typing", {
+        groupId: selectedGroup?._id,
+        username: currentUser.username,
+      });
+    }
+
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    // Set new timeout to stop typing indicator
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+      socket.emit("stop typing", {
+        groupId: selectedGroup?._id,
+      });
+    }, 1000);
+  };
+
   const currentUser = JSON.parse(localStorage.getItem("userInfo") || "{}");
 
   const scrollToBottom = () => {
@@ -80,7 +106,9 @@ const ChatArea = ({ selectedGroup, socket }) => {
       // Listen for user joined
       socket.on("user joined", (user) => {
         setConnectedUsers((prev) => {
-          const exists = prev.find((u) => u._id === user._id);
+          const exists = prev.find(
+            (u) => (u?.id || u?._id) === (user?.id || user?._id)
+          );
           if (!exists) {
             return [...prev, user];
           }
@@ -91,7 +119,7 @@ const ChatArea = ({ selectedGroup, socket }) => {
       // Listen for user left
       socket.on("user left", (userId) => {
         setConnectedUsers((prev) =>
-          prev.filter((user) => user?._id !== userId)
+          prev.filter((user) => (user?.id || user?._id) !== userId)
         );
       });
 
@@ -157,9 +185,16 @@ const ChatArea = ({ selectedGroup, socket }) => {
         if (typingTimeoutRef.current) {
           clearTimeout(typingTimeoutRef.current);
         }
+        // Stop typing indicator when leaving room
+        if (isTyping) {
+          socket.emit("stop typing", {
+            groupId: selectedGroup?._id,
+          });
+          setIsTyping(false);
+        }
       };
     }
-  }, [selectedGroup, socket, currentUser.username]);
+  }, [selectedGroup, socket, currentUser.username, isTyping]);
 
   // Monitor socket connection status
   useEffect(() => {
@@ -609,7 +644,7 @@ const ChatArea = ({ selectedGroup, socket }) => {
                 className="w-full py-3 sm:py-4 pl-4 sm:pl-6 pr-36 bg-gray-50 border-2 border-gray-200 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 rounded-2xl text-sm sm:text-base transition-all duration-200 placeholder-gray-500"
                 placeholder="Type your message..."
                 value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
+                onChange={handleTyping}
                 disabled={!selectedGroup || loading || !socketConnected}
               />
 

@@ -84,7 +84,7 @@ const Sidebar = ({ setSelectedGroup, socket }) => {
     // Listen for join requests
     socket.on("group join request", (data) => {
       console.log("Join request received:", data);
-      if (data.user._id !== userInfo.id) {
+      if ((data.user?.id || data.user?._id) !== userInfo.id) {
         // Don't show for own requests
         toast.info(
           `${data.user.username} requested to join "${data.groupName}"`
@@ -96,7 +96,7 @@ const Sidebar = ({ setSelectedGroup, socket }) => {
     // Listen for join request status updates
     socket.on("join request status", (data) => {
       console.log("Join request status:", data);
-      if (data.user._id === userInfo.id) {
+      if ((data.user?.id || data.user?._id) === userInfo.id) {
         if (data.status === "approved") {
           toast.success(
             `Your request to join "${data.groupName}" was approved!`
@@ -129,7 +129,9 @@ const Sidebar = ({ setSelectedGroup, socket }) => {
       // Set user groups
       const userGroupIds = groupsData
         .filter((group) =>
-          group.members.some((member) => member._id === userInfo.id)
+          group.members.some(
+            (member) => (member?.id || member?._id) === userInfo.id
+          )
         )
         .map((group) => group._id);
       setUserGroups(userGroupIds);
@@ -141,14 +143,16 @@ const Sidebar = ({ setSelectedGroup, socket }) => {
           id: g._id,
           name: g.name,
           isSecure: g.isSecure,
-          members: g.members.map((m) => m._id),
-          pendingMembers: g.pendingMembers.map((p) => p.user._id),
+          members: g.members.map((m) => m?.id || m?._id),
+          pendingMembers: g.pendingMembers.map(
+            (p) => p.user?.id || p.user?._id
+          ),
         }))
       );
 
       // Fetch pending requests for admin groups
       const adminGroups = groupsData.filter(
-        (group) => group.admin._id === userInfo.id
+        (group) => (group.admin?.id || group.admin?._id) === userInfo.id
       );
       const requestsData = {};
 
@@ -423,12 +427,14 @@ const Sidebar = ({ setSelectedGroup, socket }) => {
           ) : (
             groups.map((group) => {
               const isJoined = userGroups.includes(group?._id);
-              const isGroupAdmin = group.admin._id === userInfo.id;
+              const isGroupAdmin =
+                (group.admin?.id || group.admin?._id) === userInfo.id;
               const hasPendingRequests = pendingRequests[group._id]?.length > 0;
 
               // Check if user has a pending request for this group
               const hasPendingRequest = group.pendingMembers?.some(
-                (member) => member.user._id === userInfo.id
+                (member) =>
+                  (member.user?.id || member.user?._id) === userInfo.id
               );
 
               // User can interact with group if they're joined or admin (NOT pending requests)

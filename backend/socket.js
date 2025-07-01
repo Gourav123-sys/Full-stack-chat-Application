@@ -23,7 +23,7 @@ const socketIO = (io) => {
       //broadcast join notification to all other users in the room
       socket.to(groupId).emit("notification", {
         type: "USER JOINED",
-        message: `${user?.username} has joined the room`,
+        message: `${user?.username || "Someone"} has joined the room`,
         user: user,
       });
     });
@@ -50,12 +50,12 @@ const socketIO = (io) => {
         // Send leave notification to all other users in the room
         socket.to(groupId).emit("notification", {
           type: "USER LEFT",
-          message: `${user?.username} has left the room`,
+          message: `${user?.username || "Someone"} has left the room`,
           user: user,
         });
 
         // Also emit user left event for immediate UI updates
-        socket.to(groupId).emit("user left", user?._id);
+        socket.to(groupId).emit("user left", user?.id || user?._id);
       }
     });
     //end : leave room handler
@@ -168,12 +168,12 @@ const socketIO = (io) => {
         // Notify others in the room about user's departure
         socket.to(groupId).emit("notification", {
           type: "USER DISCONNECTED",
-          message: `${user?.username} has gone offline`,
+          message: `${user?.username || "Someone"} has gone offline`,
           user: user,
         });
 
         // Also emit user left event for immediate UI updates
-        socket.to(groupId).emit("user left", user?._id);
+        socket.to(groupId).emit("user left", user?.id || user?._id);
       }
     });
     //end : disconnect handler
