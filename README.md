@@ -1,6 +1,6 @@
 # Talksy - Modern Group Chat Platform
 
-A full-stack, real-time chat application for teams, friends, and communities. Built with React, Node.js, Express, MongoDB, and Socket.IO, Talksy features modern UI, secure group management, file sharing, and admin controls.
+A full-stack, real-time chat application for teams, friends, and communities. Built with React, Node.js, Express, MongoDB, and Socket.IO, Talksy features modern UI, secure group management, image sharing, and admin controls.
 
 ---
 
@@ -30,13 +30,12 @@ A full-stack, real-time chat application for teams, friends, and communities. Bu
 - Admin role management
 - Audit trail for join requests
 
-### File Sharing
+### Image Sharing
 
-- Image, document, and text file sharing
-- File preview (thumbnails for images, info for docs)
+- Share images in chat (JPG, PNG, GIF, WebP)
+- Image preview thumbnails
 - Download support
 - File size limit: 10MB
-- Supported: JPG, PNG, GIF, PDF, DOCX, XLSX, TXT, CSV
 
 ### Modern UI/UX
 
@@ -47,7 +46,7 @@ A full-stack, real-time chat application for teams, friends, and communities. Bu
 
 ### Security
 
-- File type and size validation
+- File type and size validation (images only)
 - Secure file storage (Cloudinary)
 - Access control: only group members can access files
 
@@ -127,7 +126,7 @@ npm run dev
 ## 🔧 Configuration
 
 - All environment variables must be set in your deployment platform for production.
-- File uploads are limited to 10MB and validated for type.
+- File uploads are limited to 10MB and validated for type (images only).
 
 ---
 
@@ -142,10 +141,10 @@ npm run dev
 - Browse available groups or create a new one (admins only for secure groups).
 - Join public groups instantly, or request to join secure groups (admin approval required).
 
-### 3. Chat & Share Files
+### 3. Chat & Share Images
 
 - Send messages in real-time.
-- Attach images or documents using the paperclip icon.
+- Attach images using the paperclip icon (JPG, PNG, GIF, WebP).
 - See who is online and who is typing.
 
 ### 4. Admin Features
@@ -175,12 +174,6 @@ npm run dev
 3. Make your changes
 4. Test thoroughly
 5. Submit a pull request
-
----
-
-## 📄 License
-
-MIT License
 
 ---
 
