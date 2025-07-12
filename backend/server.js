@@ -17,6 +17,7 @@ const io = new Server(server, {
   cors: {
     origin: [
       "http://localhost:5173",
+      "http://localhost:5174",
       "https://full-stack-chat-application-chi.vercel.app",
     ],
     methods: ["GET", "POST"],
@@ -29,6 +30,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
+      "http://localhost:5174",
       "https://full-stack-chat-application-chi.vercel.app",
     ],
     credentials: true,
