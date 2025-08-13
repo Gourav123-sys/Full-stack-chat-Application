@@ -77,7 +77,7 @@ const socketIO = (io) => {
     // Join group request
     socket.on("join group request", (data) => {
       console.log("Join group request:", data);
-      // Notify admin of the group about the join request
+      // Notify everyone of the group about the join request
       io.emit("group join request", {
         groupId: data.groupId,
         groupName: data.groupName,
@@ -115,7 +115,7 @@ const socketIO = (io) => {
     // Join request approved
     socket.on("join request approved", (data) => {
       console.log("Join request approved:", data);
-      // Notify the user who was approved
+      // Notify everyone who was approved
       io.emit("join request status", {
         groupId: data.groupId,
         groupName: data.groupName,
@@ -128,7 +128,7 @@ const socketIO = (io) => {
     // Join request rejected
     socket.on("join request rejected", (data) => {
       console.log("Join request rejected:", data);
-      // Notify the user who was rejected
+      // Notify everyone who was rejected
       io.emit("join request status", {
         groupId: data.groupId,
         groupName: data.groupName,
@@ -145,7 +145,7 @@ const socketIO = (io) => {
       io.emit("new group available", {
         group: data.group,
         createdBy: data.createdBy,
-        timestamp: new Date(),
+        timestamp: new Date(), 
       });
     });
     //end : group events handler

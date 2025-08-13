@@ -4,11 +4,9 @@ import {
   FiUsers,
   FiLock,
   FiLogIn,
-  FiLogOut,
   FiUserPlus,
   FiGlobe,
   FiActivity,
-  FiCheckCircle,
   FiUserCheck,
   FiArrowRight,
   FiStar,
@@ -282,8 +280,9 @@ export default function LandingPage() {
           <div className="text-lg font-bold text-blue-700">Talksy</div>
           <div className="text-gray-600 text-base font-medium">
             A modern real-time chat platform for teams, friends, and
-            communities. Welcome to{" "}
-            <span className="font-bold text-blue-700">Talksy</span>.
+            communities. 
+            {/* Welcome to{" "}
+            <span className="font-bold text-blue-700">Talksy</span>. */}
           </div>
           <div className="text-gray-700 text-base font-semibold">
             Designed & Developed by{" "}

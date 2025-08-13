@@ -4,7 +4,7 @@ import { protect } from "../middleware/authMiddleware.js";
 import multer from "multer";
 import cloudinary from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
-import sharp from "sharp";
+
 
 const messageRouter = express.Router();
 

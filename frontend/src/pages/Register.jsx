@@ -3,7 +3,6 @@ import {
   FiUser,
   FiMail,
   FiLock,
-  FiMessageCircle,
   FiUserPlus,
   FiEye,
   FiEyeOff,
