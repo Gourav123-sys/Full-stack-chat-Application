@@ -1,4 +1,6 @@
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import {
   FiMessageSquare,
   FiUsers,
@@ -11,6 +13,7 @@ import {
   FiArrowRight,
   FiStar,
 } from "react-icons/fi";
+import { API_ENDPOINTS } from "../config/api.js";
 
 const Feature = ({ title, text, icon, badges = [] }) => (
   <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-gray-100">
@@ -65,6 +68,109 @@ const ChatMessage = ({ message, sender, time, isUser }) => (
 );
 
 export default function LandingPage() {
+  const navigate = useNavigate();
+  const [isValidating, setIsValidating] = useState(true);
+
+  // Helper function to decode JWT token (without verification, just to check expiration)
+  const decodeToken = (token) => {
+    try {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      return null;
+    }
+  };
+
+  // Check if token is expired
+  const isTokenExpired = (decodedToken) => {
+    if (!decodedToken || !decodedToken.exp) return true;
+    const currentTime = Date.now() / 1000;
+    return decodedToken.exp < currentTime;
+  };
+
+  useEffect(() => {
+    const validateToken = async () => {
+      try {
+        // Check if userInfo and token exist in localStorage
+        const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+
+        if (!userInfo?.token) {
+          // No token found, show landing page
+          setIsValidating(false);
+          return;
+        }
+
+        // Decode token to check expiration (client-side check)
+        const decodedToken = decodeToken(userInfo.token);
+
+        if (isTokenExpired(decodedToken)) {
+          // Token is expired, clear localStorage and redirect to login
+          localStorage.removeItem("userInfo");
+          setIsValidating(false);
+          navigate("/login", { replace: true });
+          return;
+        }
+
+        // Verify token with backend by making a request to a protected endpoint
+        try {
+          const response = await axios.get(API_ENDPOINTS.GROUPS, {
+            headers: {
+              Authorization: `Bearer ${userInfo.token}`,
+            },
+          });
+
+          // Token is valid (200 response)
+          // Verify that the token belongs to the user in localStorage
+          if (decodedToken && decodedToken.id === userInfo.id) {
+            // Token is valid and belongs to the user, redirect to chat
+            navigate("/chat", { replace: true });
+          } else {
+            // Token doesn't match user data, clear and redirect to login
+            localStorage.removeItem("userInfo");
+            setIsValidating(false);
+            navigate("/login", { replace: true });
+          }
+        } catch (error) {
+          // Token is invalid or expired (401 or other error)
+          if (error.response?.status === 401) {
+            // Token is invalid/expired, clear localStorage and redirect to login
+            localStorage.removeItem("userInfo");
+            setIsValidating(false);
+            navigate("/login", { replace: true });
+          } else {
+            // Network error or other issue, show landing page
+            setIsValidating(false);
+          }
+        }
+      } catch (error) {
+        // Error parsing or validating, show landing page
+        console.error("Error validating token:", error);
+        setIsValidating(false);
+      }
+    };
+
+    validateToken();
+  }, [navigate]);
+
+  // Show loading state while validating token
+  if (isValidating) {
+    return (
+      <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Validating session...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
       {/* Hero Section */}
@@ -280,7 +386,7 @@ export default function LandingPage() {
           <div className="text-lg font-bold text-blue-700">Talksy</div>
           <div className="text-gray-600 text-base font-medium">
             A modern real-time chat platform for teams, friends, and
-            communities. 
+            communities.
             {/* Welcome to{" "}
             <span className="font-bold text-blue-700">Talksy</span>. */}
           </div>
