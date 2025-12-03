@@ -71,40 +71,52 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const [isValidating, setIsValidating] = useState(true);
 
+  // Decode JWT exp claim safely (no signature verification)
+  const decodeTokenExp = (token) => {
+    try {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+      const parsed = JSON.parse(jsonPayload);
+      return parsed?.exp ?? null;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const isExpired = (exp) => {
+    if (!exp) return true;
+    const now = Date.now() / 1000;
+    return exp < now;
+  };
+
   useEffect(() => {
-    const validateToken = async () => {
-      try {
-        const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+    const validateTokenClientSide = () => {
+      const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
 
-        if (!userInfo?.token) {
-          setIsValidating(false);
-          return;
-        }
-
-        // Lightweight server-side verification
-        try {
-          const response = await axios.get(API_ENDPOINTS.USER_ME, {
-            headers: { Authorization: `Bearer ${userInfo.token}` },
-          });
-
-          if (response.status === 200) {
-            navigate("/chat", { replace: true });
-          } else {
-            localStorage.removeItem("userInfo");
-            setIsValidating(false);
-          }
-        } catch (error) {
-          // Any error -> treat as invalid token
-          localStorage.removeItem("userInfo");
-          setIsValidating(false);
-        }
-      } catch (error) {
-        console.error("Error validating token:", error);
+      if (!userInfo?.token) {
         setIsValidating(false);
+        return;
+      }
+
+      const exp = decodeTokenExp(userInfo.token);
+      if (exp && !isExpired(exp)) {
+        // Valid token exists -> go directly to chat
+        navigate("/chat", { replace: true });
+      } else {
+        // Token is expired or invalid -> require login
+        localStorage.removeItem("userInfo");
+        setIsValidating(false);
+        navigate("/login", { replace: true });
       }
     };
 
-    validateToken();
+    validateTokenClientSide();
   }, [navigate]);
 
   if (isValidating) {
