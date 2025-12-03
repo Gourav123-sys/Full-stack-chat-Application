@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
   // User endpoints
   LOGIN: `${API_BASE_URL}/api/users/login`,
   REGISTER: `${API_BASE_URL}/api/users/register`,
+  USER_ME: `${API_BASE_URL}/api/users/me`,
 
   // Group endpoints
   GROUPS: `${API_BASE_URL}/api/groups`,

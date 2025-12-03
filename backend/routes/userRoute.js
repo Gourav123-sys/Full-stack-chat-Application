@@ -1,6 +1,7 @@
 import express from "express";
 import User from "../models/userModel.js";
 import jwt from "jsonwebtoken";
+import { protect } from "../middleware/authMiddleware.js";
 
 const UserRouter = express.Router();
 
@@ -53,6 +54,22 @@ UserRouter.post("/login", async (req, res) => {
     });
   } catch (error) {
     res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
+});
+
+// Lightweight auth verification: current user
+UserRouter.get("/me", protect, async (req, res) => {
+  try {
+    return res.status(200).json({
+      id: req.user._id,
+      username: req.user.username,
+      email: req.user.email,
+      isAdmin: req.user.isAdmin,
+    });
+  } catch (error) {
+    return res
       .status(500)
       .json({ message: "Internal server error", error: error.message });
   }
